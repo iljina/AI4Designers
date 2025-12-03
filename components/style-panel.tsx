@@ -184,6 +184,7 @@ export function StylePanel({
                     key={i}
                     color={color}
                     onChange={(newColor) => handleColorChange(i, newColor)}
+                    className="w-9 h-9"
                   />
                 ))}
               </div>

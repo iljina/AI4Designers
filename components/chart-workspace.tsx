@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Download, ChevronLeft, ChevronRight, PanelLeftClose, PanelRightClose } from "lucide-react"
 import type { ChartType, ChartData } from "@/app/page"
@@ -62,27 +62,39 @@ export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack
     setCustomPalettes(palettes)
   }
 
-  const handleMouseDown = () => {
-    setIsResizing(true)
-  }
-
-  const handleMouseMove = (e: MouseEvent) => {
-    if (isResizing) {
-      const newWidth = e.clientX
-      if (newWidth >= 200 && newWidth <= 600) {
-        setLeftPanelWidth(newWidth)
+  // Handle resizing with click-to-toggle behavior
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isResizing) {
+        const newWidth = e.clientX
+        // Limit width between 200px and 600px
+        if (newWidth >= 200 && newWidth <= 600) {
+          setLeftPanelWidth(newWidth)
+        }
       }
     }
-  }
 
-  const handleMouseUp = () => {
-    setIsResizing(false)
-  }
+    const handleGlobalClick = () => {
+      if (isResizing) {
+        setIsResizing(false)
+      }
+    }
 
-  // Add event listeners for resize
-  if (typeof window !== 'undefined') {
-    window.addEventListener('mousemove', handleMouseMove as any)
-    window.addEventListener('mouseup', handleMouseUp)
+    if (isResizing) {
+      window.addEventListener('mousemove', handleMouseMove)
+      // Add a small delay to avoid the initial click triggering the close immediately
+      setTimeout(() => window.addEventListener('click', handleGlobalClick), 0)
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('click', handleGlobalClick)
+    }
+  }, [isResizing])
+
+  const handleResizeStart = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsResizing(!isResizing)
   }
 
   return (
@@ -125,8 +137,8 @@ export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack
             </div>
             {/* Resize Handle */}
             <div
-              onMouseDown={handleMouseDown}
-              className="w-1 bg-border hover:bg-primary cursor-col-resize transition-colors"
+              onClick={handleResizeStart}
+              className={`w-1 cursor-col-resize transition-colors ${isResizing ? 'bg-primary' : 'bg-border hover:bg-primary'}`}
             />
           </>
         )}
