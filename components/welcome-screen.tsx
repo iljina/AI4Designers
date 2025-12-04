@@ -53,7 +53,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
           ))}
         </div>
 
-        <Button size="lg" onClick={onStart} className="gap-2 px-8 bg-green-600 hover:bg-green-700 text-white">
+        <Button size="lg" onClick={onStart} className="gap-2 px-8">
           Get Started
           <ArrowRight className="w-4 h-4" />
         </Button>
