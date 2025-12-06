@@ -5,14 +5,16 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowRight, HelpCircle, Upload } from "lucide-react"
+import { ArrowRight, HelpCircle, Upload, Sparkles, Loader2 } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import type { ChartData } from "@/app/page"
 import Image from "next/image"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { analyzeDataWithAI, parseCSVFallback, type AIAnalysisResult } from "@/lib/ai-service"
 
 interface DataInputScreenProps {
   onSubmit: (data: ChartData) => void
+  onAnalyze: (result: AIAnalysisResult) => void
   onBack: () => void
 }
 
@@ -38,10 +40,11 @@ Oct,9200,4900,4300,46
 Nov,10500,5500,5000,47
 Dec,12000,6000,6000,50`
 
-export function DataInputScreen({ onSubmit, onBack }: DataInputScreenProps) {
+export function DataInputScreen({ onSubmit, onAnalyze, onBack }: DataInputScreenProps) {
   const [title, setTitle] = useState("")
-  const [csvData, setCsvData] = useState("")
+  const [rawData, setRawData] = useState("")
   const [error, setError] = useState("")
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
 
   const parseCSV = (csv: string): { data: Array<Record<string, string | number>>; columns: string[] } | null => {
     try {
@@ -65,37 +68,61 @@ export function DataInputScreen({ onSubmit, onBack }: DataInputScreenProps) {
     }
   }
 
-  const handleSubmit = () => {
-    if (!title.trim()) {
-      setError("Please enter a chart title")
-      return
-    }
-    if (!csvData.trim()) {
+  const handleAnalyzeWithAI = async () => {
+    if (!rawData.trim()) {
       setError("Please enter your data")
       return
     }
 
-    const parsed = parseCSV(csvData)
-    if (!parsed) {
-      setError("Invalid CSV format. Please check your data.")
+    setError("")
+    setIsAnalyzing(true)
+
+    try {
+      const result = await analyzeDataWithAI(rawData)
+      setTitle(result.title)
+      onAnalyze(result)
+    } catch (err) {
+      console.error("AI analysis failed:", err)
+      setError(
+        err instanceof Error
+          ? err.message
+          : "AI analysis failed. Please check your API key or try manual mode."
+      )
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }
+
+  const handleManualSubmit = () => {
+    if (!title.trim()) {
+      setError("Please enter a chart title")
+      return
+    }
+    if (!rawData.trim()) {
+      setError("Please enter your data")
       return
     }
 
-    setError("")
-    onSubmit({
-      title: title.trim(),
-      data: parsed.data,
-      columns: parsed.columns,
-    })
+    try {
+      const parsed = parseCSVFallback(rawData)
+      setError("")
+      onSubmit({
+        title: title.trim(),
+        data: parsed.data,
+        columns: parsed.columns,
+      })
+    } catch (err) {
+      setError("Invalid CSV format. Please check your data.")
+    }
   }
 
   const loadSimple = () => {
-    setCsvData(sampleCSV)
+    setRawData(sampleCSV)
     setTitle("Monthly Sales Report")
   }
 
   const loadComplex = () => {
-    setCsvData(complexCSV)
+    setRawData(complexCSV)
     setTitle("Annual Financial Overview")
   }
 
@@ -114,7 +141,7 @@ export function DataInputScreen({ onSubmit, onBack }: DataInputScreenProps) {
         <div className="max-w-xl w-full space-y-6">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-foreground">Enter your data</h1>
-            <p className="text-muted-foreground">Add a title and paste your data in CSV format</p>
+            <p className="text-muted-foreground">Add your data in any format - AI will analyze it</p>
           </div>
 
           <div className="space-y-4">
@@ -131,7 +158,7 @@ export function DataInputScreen({ onSubmit, onBack }: DataInputScreenProps) {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="data">Data (CSV format)</Label>
+                  <Label htmlFor="data">Data (any format)</Label>
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -162,10 +189,11 @@ export function DataInputScreen({ onSubmit, onBack }: DataInputScreenProps) {
               </div>
               <Textarea
                 id="data"
-                placeholder={`Month,Value\nJan,100\nFeb,150\nMar,200`}
-                value={csvData}
-                onChange={(e) => setCsvData(e.target.value)}
+                placeholder={`Enter your data in any format:\n\nCSV format:\nMonth,Value\nJan,100\nFeb,150\n\nOr raw text:\nSales in Jan were 100, Feb 150, Mar 200`}
+                value={rawData}
+                onChange={(e) => setRawData(e.target.value)}
                 className="min-h-[200px] font-mono text-sm"
+                disabled={isAnalyzing}
               />
             </div>
 
@@ -180,21 +208,12 @@ export function DataInputScreen({ onSubmit, onBack }: DataInputScreenProps) {
                     const file = e.target.files?.[0]
                     if (!file) return
 
-                    if (file.name.endsWith(".csv") || file.name.endsWith(".txt")) {
-                      const reader = new FileReader()
-                      reader.onload = (e) => {
-                        const text = e.target?.result as string
-                        setCsvData(text)
-                      }
-                      reader.readAsText(file)
-                    } else {
-                      // Simulate AI processing for other files
-                      setCsvData("Loading...")
-                      setTimeout(() => {
-                        setCsvData(sampleCSV)
-                        setTitle("AI Generated Report from " + file.name)
-                      }, 1500)
+                    const reader = new FileReader()
+                    reader.onload = (e) => {
+                      const text = e.target?.result as string
+                      setRawData(text)
                     }
+                    reader.readAsText(file)
                   }}
                 />
                 <Button
@@ -215,10 +234,34 @@ export function DataInputScreen({ onSubmit, onBack }: DataInputScreenProps) {
             {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
 
-          <Button onClick={handleSubmit} className="w-full gap-2">
-            Continue
-            <ArrowRight className="w-4 h-4" />
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={handleAnalyzeWithAI}
+              className="flex-1 gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              disabled={isAnalyzing}
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Analyze with AI
+                </>
+              )}
+            </Button>
+            <Button
+              onClick={handleManualSubmit}
+              variant="secondary"
+              className="flex-1 gap-2 hover:bg-card"
+              disabled={isAnalyzing}
+            >
+              Manual Mode
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
