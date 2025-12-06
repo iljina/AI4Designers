@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { Button } from "@/components/ui/button"
-import { BarChart3, LineChart, AreaChart, PieChart, Check, Sparkles } from "lucide-react"
+import { BarChart3, LineChart, AreaChart, PieChart, Check } from "lucide-react"
 import { useState } from "react"
 import type { ChartType } from "@/app/page"
 import { cn } from "@/lib/utils"
@@ -27,20 +27,8 @@ const templates: { type: ChartType; name: string; icon: React.ElementType; descr
 export function TemplateSelectionScreen({ onSelect, onBack, recommendations }: TemplateSelectionScreenProps) {
   const [selected, setSelected] = useState<ChartType>("bar")
 
-  // Sort templates by recommendations if available
-  const sortedTemplates = recommendations
-    ? [...templates].sort((a, b) => {
-      const aRec = recommendations.find((r) => r.type === a.type)
-      const bRec = recommendations.find((r) => r.type === b.type)
-      const aConf = aRec?.confidence || 0
-      const bConf = bRec?.confidence || 0
-      return bConf - aConf
-    })
-    : templates
-
-  const getRecommendation = (type: ChartType) => {
-    return recommendations?.find((r) => r.type === type)
-  }
+  // Get the top recommendation (if available)
+  const topRecommendation = recommendations && recommendations.length > 0 ? recommendations[0].type : null
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -57,53 +45,32 @@ export function TemplateSelectionScreen({ onSelect, onBack, recommendations }: T
         <div className="max-w-2xl w-full space-y-6">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-foreground">Choose a template</h1>
-            <p className="text-muted-foreground">
-              {recommendations
-                ? "AI recommends these chart types for your data"
-                : "Select the chart type that best represents your data"}
-            </p>
+            <p className="text-muted-foreground">Select the chart type that best represents your data</p>
           </div>
 
-          {recommendations && recommendations.length > 0 && (
-            <div className="flex items-center gap-2 text-sm font-medium text-purple-600">
-              <Sparkles className="w-4 h-4" />
-              <span>AI Recommendations (sorted by relevance)</span>
-            </div>
-          )}
-
           <div className="grid grid-cols-2 gap-4">
-            {sortedTemplates.map((template) => {
-              const recommendation = getRecommendation(template.type)
-              const isRecommended = !!recommendation
+            {templates.map((template) => {
+              const isRecommended = topRecommendation === template.type
 
               return (
                 <button
                   key={template.type}
                   onClick={() => setSelected(template.type)}
                   className={cn(
-                    "p-6 rounded-xl border-2 text-left transition-all relative overflow-hidden",
+                    "p-6 rounded-xl border-2 text-left transition-all relative",
                     "hover:border-primary/50 hover:bg-card",
-                    selected === template.type ? "border-primary bg-card" : "border-border bg-background",
-                    isRecommended && "ring-2 ring-purple-500/20"
+                    selected === template.type ? "border-primary bg-card" : "border-border bg-background"
                   )}
                 >
                   {isRecommended && (
-                    <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-purple-600/10 to-blue-600/10 rounded-full border border-purple-500/30">
-                      <Sparkles className="w-3 h-3 text-purple-600" />
-                      <span className="text-xs font-medium text-purple-600">{recommendation.confidence}%</span>
+                    <div className="absolute top-3 right-3 px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-md border border-primary/20">
+                      Recommended
                     </div>
                   )}
 
                   <div className="flex items-start justify-between mb-4">
                     <template.icon
-                      className={cn(
-                        "w-10 h-10",
-                        selected === template.type
-                          ? "text-primary"
-                          : isRecommended
-                            ? "text-purple-600"
-                            : "text-muted-foreground"
-                      )}
+                      className={cn("w-10 h-10", selected === template.type ? "text-primary" : "text-muted-foreground")}
                     />
                     {selected === template.type && (
                       <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
@@ -113,11 +80,7 @@ export function TemplateSelectionScreen({ onSelect, onBack, recommendations }: T
                   </div>
 
                   <h3 className="font-semibold text-foreground mb-1">{template.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-2">{template.description}</p>
-
-                  {recommendation && (
-                    <p className="text-xs text-purple-600 mt-2 italic line-clamp-2">{recommendation.reason}</p>
-                  )}
+                  <p className="text-sm text-muted-foreground">{template.description}</p>
                 </button>
               )
             })}
