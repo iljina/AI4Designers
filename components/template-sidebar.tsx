@@ -35,7 +35,7 @@ export function TemplateSidebar({ selectedType, onTypeChange }: TemplateSidebarP
             )}
           >
             <Icon className={cn("w-5 h-5 mx-auto mb-1", selectedType === type ? "text-primary" : "")} />
-            <span className={cn("text-xs", selectedType === type ? "text-white" : "")}>{name}</span>
+            <span className={cn("text-xs", selectedType === type ? "text-foreground" : "")}>{name}</span>
           </button>
         ))}
       </div>

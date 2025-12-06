@@ -8,6 +8,7 @@ import { useState } from "react"
 import type { ChartType } from "@/app/page"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 interface TemplateSelectionScreenProps {
   onSelect: (template: ChartType) => void
@@ -28,8 +29,9 @@ export function TemplateSelectionScreen({ onSelect, onBack }: TemplateSelectionS
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="border-b border-border px-4 py-3 bg-card">
-        <div className="flex items-center">
+        <div className="flex items-center justify-between">
           <Image src="/logo.svg" alt="ChartFlow" width={140} height={35} priority />
+          <ThemeToggle />
         </div>
       </header>
 
@@ -69,7 +71,7 @@ export function TemplateSelectionScreen({ onSelect, onBack }: TemplateSelectionS
           </div>
 
           <div className="flex gap-3">
-            <Button variant="secondary" onClick={onBack} className="flex-1 hover:bg-card hover:text-white">
+            <Button variant="secondary" onClick={onBack} className="flex-1 hover:bg-card">
               Back
             </Button>
             <Button onClick={() => onSelect(selected)} className="flex-1">

@@ -9,6 +9,7 @@ import { ArrowRight, HelpCircle, Upload } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import type { ChartData } from "@/app/page"
 import Image from "next/image"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 interface DataInputScreenProps {
   onSubmit: (data: ChartData) => void
@@ -102,8 +103,9 @@ export function DataInputScreen({ onSubmit, onBack }: DataInputScreenProps) {
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="border-b border-border px-4 py-3 bg-card">
-        <div className="flex items-center">
+        <div className="flex items-center justify-between">
           <Image src="/logo.svg" alt="ChartFlow" width={140} height={35} priority />
+          <ThemeToggle />
         </div>
       </header>
 
@@ -145,14 +147,14 @@ export function DataInputScreen({ onSubmit, onBack }: DataInputScreenProps) {
                   Try sample data:{" "}
                   <button
                     onClick={loadSimple}
-                    className="text-foreground hover:underline hover:text-white transition-colors"
+                    className="text-foreground hover:underline transition-colors"
                   >
                     Simple
                   </button>
                   {" | "}
                   <button
                     onClick={loadComplex}
-                    className="text-foreground hover:underline hover:text-white transition-colors"
+                    className="text-foreground hover:underline transition-colors"
                   >
                     Complex
                   </button>
@@ -198,7 +200,7 @@ export function DataInputScreen({ onSubmit, onBack }: DataInputScreenProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="gap-2 border border-white/20 text-white hover:bg-card hover:text-white hover:border-white/30"
+                  className="gap-2 border border-border hover:bg-card hover:border-primary/50"
                   onClick={() => document.getElementById("file-upload")?.click()}
                 >
                   <Upload className="w-4 h-4" />

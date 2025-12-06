@@ -9,6 +9,7 @@ import { DataPanel } from "@/components/data-panel"
 import { TemplateSidebar } from "@/components/template-sidebar"
 import { StylePanel } from "@/components/style-panel"
 import { ExportModal } from "@/components/export-modal"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 interface ChartWorkspaceProps {
   chartData: ChartData
@@ -102,105 +103,95 @@ export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack
       {/* Header */}
       <header className="border-b border-border px-4 py-3 flex items-center justify-between bg-card">
         <div className="flex items-center gap-4">
-          <Button variant="secondary" size="sm" onClick={onBack} className="gap-2 hover:bg-card hover:text-white">
+          <Button variant="secondary" size="sm" onClick={onBack} className="gap-2 hover:bg-card">
             <ArrowLeft className="w-4 h-4" />
             Back to Start
           </Button>
         </div>
-        <Button onClick={() => setShowExport(true)} className="gap-2">
-          <Download className="w-4 h-4" />
-          Export
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setShowExport(true)} className="gap-2">
+            <Download className="w-4 h-4" />
+            Export
+          </Button>
+          <ThemeToggle />
+        </div>
       </header>
 
       {/* Main Content */}
       <div className="flex-1 flex relative">
         {/* Left Panel - Data */}
-        {leftPanelOpen && (
-          <>
-            <div
-              className="border-r border-border bg-card p-4 space-y-4 overflow-y-auto"
-              style={{ width: `${leftPanelWidth}px` }}
-            >
-              <div className="flex items-center justify-between">
-                <h2 className="font-semibold text-foreground">Data</h2>
+        <>
+          <div
+            className="border-r border-border bg-card overflow-y-auto"
+            style={{ width: leftPanelOpen ? `${leftPanelWidth}px` : '48px' }}
+          >
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                {leftPanelOpen && <h2 className="font-semibold text-foreground">Data</h2>}
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setLeftPanelOpen(false)}
+                  onClick={() => setLeftPanelOpen(!leftPanelOpen)}
                   className="h-6 w-6"
                 >
-                  <PanelLeftClose className="w-4 h-4" />
+                  {leftPanelOpen ? (
+                    <PanelLeftClose className="w-4 h-4" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4" />
+                  )}
                 </Button>
               </div>
-              <DataPanel data={currentData} onDataChange={setCurrentData} />
+              {leftPanelOpen && <DataPanel data={currentData} onDataChange={setCurrentData} />}
             </div>
-            {/* Resize Handle */}
+          </div>
+          {/* Resize Handle */}
+          {leftPanelOpen && (
             <div
               onClick={handleResizeStart}
               className={`w-1 cursor-col-resize transition-colors ${isResizing ? 'bg-primary' : 'bg-border hover:bg-primary'}`}
             />
-          </>
-        )}
-
-        {/* Toggle Left Panel Button */}
-        {!leftPanelOpen && (
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={() => setLeftPanelOpen(true)}
-              className="rounded-l-none h-16"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
-        )}
+          )}
+        </>
 
         {/* Center - Chart Preview */}
         <div className="flex-1 p-6 flex items-center justify-center bg-background">
           <ChartPreview data={currentData} chartType={chartType} styles={styles} />
         </div>
 
-        {/* Toggle Right Panel Button */}
-        {!rightPanelOpen && (
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10">
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={() => setRightPanelOpen(true)}
-              className="rounded-r-none h-16"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-          </div>
-        )}
-
         {/* Right Panel - Template & Style */}
-        {rightPanelOpen && (
-          <div className="w-72 border-l border-border bg-card flex flex-col">
-            <div className="p-4 pb-0 flex items-center justify-end">
+        <div className="border-l border-border bg-card flex flex-col" style={{ width: rightPanelOpen ? '288px' : '48px' }}>
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              {rightPanelOpen && <h2 className="font-semibold text-foreground">Appearance</h2>}
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setRightPanelOpen(false)}
+                onClick={() => setRightPanelOpen(!rightPanelOpen)}
                 className="h-6 w-6"
               >
-                <PanelRightClose className="w-4 h-4" />
+                {rightPanelOpen ? (
+                  <PanelRightClose className="w-4 h-4" />
+                ) : (
+                  <ChevronLeft className="w-4 h-4" />
+                )}
               </Button>
             </div>
-            <TemplateSidebar selectedType={chartType} onTypeChange={onChartTypeChange} />
-            <StylePanel
-              styles={styles}
-              onStyleChange={setStyles}
-              selectedPalette={selectedPalette}
-              onPaletteChange={handlePaletteChange}
-              colorPalettes={colorPalettes}
-              customPalettes={customPalettes}
-              onCustomPalettesChange={handleCustomPalettesChange}
-            />
           </div>
-        )}
+          {rightPanelOpen && (
+            <>
+              <TemplateSidebar selectedType={chartType} onTypeChange={onChartTypeChange} />
+              <StylePanel
+                styles={styles}
+                onStyleChange={setStyles}
+                selectedPalette={selectedPalette}
+                onPaletteChange={handlePaletteChange}
+                colorPalettes={colorPalettes}
+                customPalettes={customPalettes}
+                onCustomPalettesChange={handleCustomPalettesChange}
+              />
+            </>
+          )}
+        </div>
       </div>
 
       {/* Export Modal */}

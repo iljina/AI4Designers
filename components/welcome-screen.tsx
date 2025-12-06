@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { BarChart3, Zap, Sparkles, ArrowRight } from "lucide-react"
 import Image from "next/image"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 interface WelcomeScreenProps {
   onStart: () => void
@@ -29,6 +30,9 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="max-w-2xl w-full text-center space-y-8">
         <div className="space-y-4">
           <div className="flex items-center justify-center mb-6">

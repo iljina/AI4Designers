@@ -21,6 +21,7 @@ import {
 import type { ChartType, ChartData } from "@/app/page"
 import type { ChartStyles } from "@/components/chart-workspace"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useTheme } from "next-themes"
 import type React from "react"
 
 interface ChartPreviewProps {
@@ -31,6 +32,8 @@ interface ChartPreviewProps {
 
 export function ChartPreview({ data, chartType, styles }: ChartPreviewProps) {
   const { colorPalette, showGrid, showLegend } = styles
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === "dark"
 
   const { numericColumns, labelColumn } = useMemo(() => {
     const firstRow = data.data[0]
@@ -43,10 +46,11 @@ export function ChartPreview({ data, chartType, styles }: ChartPreviewProps) {
   }, [data])
 
   const tooltipStyle = {
-    backgroundColor: "#1a1a2e",
-    border: "1px solid #333",
+    backgroundColor: isDark ? "#1a1a2e" : "#ffffff",
+    border: isDark ? "1px solid #333" : "1px solid #e5e5e5",
     borderRadius: "8px",
-    color: "#fff",
+    color: isDark ? "#fff" : "#000",
+    boxShadow: isDark ? "none" : "0 4px 6px -1px rgb(0 0 0 / 0.1)",
   }
 
   if (!data.data.length || !data.columns.length) {
@@ -66,10 +70,10 @@ export function ChartPreview({ data, chartType, styles }: ChartPreviewProps) {
 
   const renderBarChart = () => (
     <BarChart data={data.data}>
-      {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#333" />}
+      {showGrid && <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#333" : "#e5e5e5"} />}
       <XAxis dataKey={labelColumn} stroke="#888" fontSize={12} />
       <YAxis stroke="#888" fontSize={12} />
-      <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "rgba(255, 255, 255, 0.1)" }} />
+      <Tooltip contentStyle={tooltipStyle} cursor={{ fill: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)" }} />
       {showLegend && <Legend />}
       {numericColumns.map((col, i) => (
         <Bar key={col} dataKey={col} fill={colorPalette[i % colorPalette.length]} radius={[4, 4, 0, 0]} />
@@ -79,7 +83,7 @@ export function ChartPreview({ data, chartType, styles }: ChartPreviewProps) {
 
   const renderLineChart = () => (
     <LineChart data={data.data}>
-      {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#333" />}
+      {showGrid && <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#333" : "#e5e5e5"} />}
       <XAxis dataKey={labelColumn} stroke="#888" fontSize={12} />
       <YAxis stroke="#888" fontSize={12} />
       <Tooltip contentStyle={tooltipStyle} />
@@ -99,7 +103,7 @@ export function ChartPreview({ data, chartType, styles }: ChartPreviewProps) {
 
   const renderAreaChart = () => (
     <AreaChart data={data.data}>
-      {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#333" />}
+      {showGrid && <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#333" : "#e5e5e5"} />}
       <XAxis dataKey={labelColumn} stroke="#888" fontSize={12} />
       <YAxis stroke="#888" fontSize={12} />
       <Tooltip contentStyle={tooltipStyle} />
@@ -134,14 +138,14 @@ export function ChartPreview({ data, chartType, styles }: ChartPreviewProps) {
           cx="50%"
           cy="50%"
           outerRadius={120}
-          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+          label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
           labelLine={{ stroke: "#888" }}
         >
           {pieData.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={entry.fill} />
           ))}
         </Pie>
-        <Tooltip contentStyle={tooltipStyle} itemStyle={{ color: "#fff" }} />
+        <Tooltip contentStyle={tooltipStyle} itemStyle={{ color: isDark ? "#fff" : "#000" }} />
         {showLegend && <Legend />}
       </PieChart>
     )
