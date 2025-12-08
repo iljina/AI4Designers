@@ -65,11 +65,7 @@ export function TemplateSelectionScreen({ onSelect, onBack, recommendations }: T
                     selected === template.type ? "border-primary bg-card" : "border-border bg-card"
                   )}
                 >
-                  {isRecommended && (
-                    <div className="absolute top-3 right-3 px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-md border border-primary/20">
-                      Recommended
-                    </div>
-                  )}
+
 
                   <div className="flex items-start justify-between mb-4">
                     <template.icon
@@ -82,7 +78,14 @@ export function TemplateSelectionScreen({ onSelect, onBack, recommendations }: T
                     )}
                   </div>
 
-                  <h3 className="font-semibold text-foreground mb-1">{template.name}</h3>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-foreground">{template.name}</h3>
+                    {isRecommended && (
+                      <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs font-medium rounded border border-primary/20">
+                        Recommended
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-muted-foreground">{template.description}</p>
                 </button>
               )

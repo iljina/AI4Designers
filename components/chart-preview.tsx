@@ -36,14 +36,14 @@ interface ChartPreviewProps {
 // Custom Legend component with black text and colored squares
 const CustomLegend = ({ payload }: any) => {
   return (
-    <div className="flex justify-center gap-6 mt-4">
+    <div className="flex flex-wrap justify-center gap-4 mt-4 px-4">
       {payload?.map((entry: any, index: number) => (
         <div key={`legend-${index}`} className="flex items-center gap-2">
           <div
-            className="w-4 h-4 rounded-sm"
+            className="w-4 h-4 rounded-sm flex-shrink-0"
             style={{ backgroundColor: entry.color }}
           />
-          <span className="text-sm text-foreground">{entry.value}</span>
+          <span className="text-sm text-foreground whitespace-nowrap">{entry.value}</span>
         </div>
       ))}
     </div>
