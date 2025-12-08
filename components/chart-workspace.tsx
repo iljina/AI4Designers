@@ -178,8 +178,8 @@ export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack
         </>
 
         {/* Center - Chart Preview */}
-        <div ref={chartRef} className="flex-1 p-6 flex items-center justify-center bg-background">
-          <ChartPreview data={currentData} chartType={chartType} styles={styles} />
+        <div className="flex-1 p-6 flex items-center justify-center bg-background">
+          <ChartPreview ref={chartRef} data={currentData} chartType={chartType} styles={styles} />
         </div>
 
         {/* Right Panel - Template & Style */}
