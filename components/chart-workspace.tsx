@@ -109,47 +109,61 @@ export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack
       if (format === "png") {
         const dataUrl = await htmlToImage.toPng(node, {
           quality: 1.0,
-          pixelRatio: 2, // Higher quality
+          pixelRatio: 2,
         })
         const link = document.createElement("a")
         link.download = `${currentData.title || "chart"}.png`
         link.href = dataUrl
         link.click()
       } else if (format === "svg") {
-        // For SVG, convert to canvas first (works better with Recharts)
-        const canvas = await htmlToImage.toCanvas(node, {
-          quality: 1.0,
-          pixelRatio: 2,
+        // Extract the actual SVG element from Recharts (it renders real SVG!)
+        const svgElement = node.querySelector('svg')
+
+        if (!svgElement) {
+          console.error("No SVG element found in chart")
+          return
+        }
+
+        // Clone the SVG to avoid modifying the original
+        const clonedSvg = svgElement.cloneNode(true) as SVGElement
+
+        // Get all elements and apply computed styles inline
+        const allElements = clonedSvg.querySelectorAll('*')
+        allElements.forEach((el) => {
+          const computedStyle = window.getComputedStyle(el as Element)
+          const inlineStyle = Array.from(computedStyle).reduce((acc, prop) => {
+            const value = computedStyle.getPropertyValue(prop)
+            if (value && value !== 'none' && value !== 'normal') {
+              return `${acc}${prop}:${value};`
+            }
+            return acc
+          }, '')
+          if (inlineStyle) {
+            (el as HTMLElement).setAttribute('style', inlineStyle)
+          }
         })
 
-        // Convert canvas to blob
-        canvas.toBlob((blob) => {
-          if (blob) {
-            // Create SVG with embedded PNG image
-            const reader = new FileReader()
-            reader.onloadend = () => {
-              const base64data = reader.result as string
+        // Set proper SVG attributes
+        clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+        clonedSvg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
 
-              // Create an SVG with the canvas image embedded
-              const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-     width="${canvas.width}" height="${canvas.height}" viewBox="0 0 ${canvas.width} ${canvas.height}">
-  <image width="${canvas.width}" height="${canvas.height}" xlink:href="${base64data}"/>
-</svg>`
+        // Serialize the SVG
+        const serializer = new XMLSerializer()
+        let svgString = serializer.serializeToString(clonedSvg)
 
-              const svgBlob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' })
-              const url = URL.createObjectURL(svgBlob)
-              const link = document.createElement("a")
-              link.download = `${currentData.title || "chart"}.svg`
-              link.href = url
-              link.click()
+        // Add XML declaration
+        svgString = '<?xml version="1.0" encoding="UTF-8"?>\n' + svgString
 
-              // Clean up
-              setTimeout(() => URL.revokeObjectURL(url), 100)
-            }
-            reader.readAsDataURL(blob)
-          }
-        }, 'image/png', 1.0)
+        // Create blob and download
+        const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement("a")
+        link.download = `${currentData.title || "chart"}.svg`
+        link.href = url
+        link.click()
+
+        // Clean up
+        setTimeout(() => URL.revokeObjectURL(url), 100)
       }
     } catch (error) {
       console.error("Export failed:", error)
