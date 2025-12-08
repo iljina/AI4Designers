@@ -13,27 +13,35 @@ interface ExportModalProps {
   open: boolean
   onClose: () => void
   chartTitle: string
+  onExport: (format: ExportFormat) => Promise<void> | void
 }
 
-type ExportFormat = "png" | "svg" | "ppt" | "key"
+type ExportFormat = "png" | "svg"
 
 const formats: { value: ExportFormat; label: string; icon: React.ElementType; description: string }[] = [
   { value: "png", label: "PNG", icon: FileImage, description: "High-quality image" },
   { value: "svg", label: "SVG", icon: FileCode, description: "Scalable vector" },
-  { value: "ppt", label: "PowerPoint", icon: Presentation, description: "Microsoft PowerPoint" },
-  { value: "key", label: "Keynote", icon: Presentation, description: "Apple Keynote" },
 ]
 
-export function ExportModal({ open, onClose, chartTitle }: ExportModalProps) {
+export function ExportModal({ open, onClose, chartTitle, onExport }: ExportModalProps) {
   const [format, setFormat] = useState<ExportFormat>("png")
   const [exported, setExported] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
 
-  const handleExport = () => {
-    setExported(true)
-    setTimeout(() => {
-      setExported(false)
-      onClose()
-    }, 1500)
+  const handleExport = async () => {
+    try {
+      setIsExporting(true)
+      await onExport(format)
+      setExported(true)
+      setTimeout(() => {
+        setExported(false)
+        onClose()
+      }, 1500)
+    } catch (error) {
+      console.error("Export failed", error)
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   return (
@@ -76,11 +84,11 @@ export function ExportModal({ open, onClose, chartTitle }: ExportModalProps) {
             </RadioGroup>
 
             <div className="flex gap-3">
-              <Button variant="outline" onClick={onClose} className="flex-1 bg-transparent">
+              <Button variant="outline" onClick={onClose} className="flex-1 bg-transparent" disabled={isExporting}>
                 Cancel
               </Button>
-              <Button onClick={handleExport} className="flex-1">
-                Export
+              <Button onClick={handleExport} className="flex-1" disabled={isExporting}>
+                {isExporting ? "Exporting..." : "Export"}
               </Button>
             </div>
           </div>

@@ -10,6 +10,7 @@ import { TemplateSidebar } from "@/components/template-sidebar"
 import { StylePanel } from "@/components/style-panel"
 import { ExportModal } from "@/components/export-modal"
 import { ThemeToggle } from "@/components/theme-toggle"
+import * as htmlToImage from "html-to-image"
 
 interface ChartWorkspaceProps {
   chartData: ChartData
@@ -33,6 +34,7 @@ const colorPalettes = {
 }
 
 export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack }: ChartWorkspaceProps) {
+  const chartRef = useRef<HTMLDivElement>(null)
   const [styles, setStyles] = useState<ChartStyles>({
     colorPalette: colorPalettes.default,
     showGrid: true,
@@ -98,6 +100,28 @@ export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack
     setIsResizing(!isResizing)
   }
 
+  const handleExport = async (format: "png" | "svg") => {
+    if (!chartRef.current) return
+
+    try {
+      const node = chartRef.current
+      let dataUrl = ""
+
+      if (format === "png") {
+        dataUrl = await htmlToImage.toPng(node)
+      } else if (format === "svg") {
+        dataUrl = await htmlToImage.toSvg(node)
+      }
+
+      const link = document.createElement("a")
+      link.download = `${currentData.title || "chart"}.${format}`
+      link.href = dataUrl
+      link.click()
+    } catch (error) {
+      console.error("Export failed:", error)
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
@@ -154,7 +178,7 @@ export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack
         </>
 
         {/* Center - Chart Preview */}
-        <div className="flex-1 p-6 flex items-center justify-center bg-background">
+        <div ref={chartRef} className="flex-1 p-6 flex items-center justify-center bg-background">
           <ChartPreview data={currentData} chartType={chartType} styles={styles} />
         </div>
 
@@ -195,7 +219,12 @@ export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack
       </div>
 
       {/* Export Modal */}
-      <ExportModal open={showExport} onClose={() => setShowExport(false)} chartTitle={currentData.title} />
+      <ExportModal
+        open={showExport}
+        onClose={() => setShowExport(false)}
+        chartTitle={currentData.title}
+        onExport={handleExport}
+      />
     </div>
   )
 }
