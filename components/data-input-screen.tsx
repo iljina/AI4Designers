@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import type { ChartData } from "@/app/page"
 import Image from "next/image"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { BrandLogo } from "@/components/ui/brand-logo"
 import { analyzeDataWithAI, parseCSVFallback, type AIAnalysisResult } from "@/lib/ai-service"
 
 interface DataInputScreenProps {
@@ -17,6 +18,10 @@ interface DataInputScreenProps {
   onAnalyze: (result: AIAnalysisResult) => void
   onBack: () => void
 }
+// ... (CSV constants remain implicitly the same, but I need to focus on replacement area)
+
+// I will target a larger block to clean up the mess
+
 
 const sampleCSV = `Month,Sales,Expenses
 January,4000,2400
@@ -101,7 +106,7 @@ export function DataInputScreen({ onSubmit, onAnalyze, onBack }: DataInputScreen
       {/* Header */}
       <header className="border-b border-border px-4 py-3 bg-card">
         <div className="flex items-center justify-between">
-          <Image src="/logo.svg" alt="ChartFlow" width={140} height={35} priority />
+          <BrandLogo />
           <ThemeToggle />
         </div>
       </header>
@@ -114,8 +119,8 @@ export function DataInputScreen({ onSubmit, onAnalyze, onBack }: DataInputScreen
             <p className="text-muted-foreground">Add your data in any format - AI will analyze it</p>
           </div>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
+          <div className="space-y-8">
+            <div className="space-y-2 mb-8">
               <Label htmlFor="title">Chart Title (optional)</Label>
               <Input
                 id="title"

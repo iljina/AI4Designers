@@ -5,7 +5,7 @@
 
 /* Updated primary brand color to #F24747 (oklch(0.62 0.22 25)) */
 :root {
-  --background: oklch(1 0 0);
+  --background: oklch(0.984 0.001 259);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -120,6 +120,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

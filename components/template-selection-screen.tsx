@@ -3,12 +3,13 @@
 import type React from "react"
 
 import { Button } from "@/components/ui/button"
-import { BarChart3, LineChart, AreaChart, PieChart, Check } from "lucide-react"
+import { BarChart3, LineChart, AreaChart, PieChart, CircleDot, Droplets, Check } from "lucide-react"
 import { useState } from "react"
 import type { ChartType } from "@/app/page"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { BrandLogo } from "@/components/ui/brand-logo"
 import type { ChartRecommendation } from "@/lib/ai-service"
 
 interface TemplateSelectionScreenProps {
@@ -22,33 +23,35 @@ const templates: { type: ChartType; name: string; icon: React.ElementType; descr
   { type: "line", name: "Line Chart", icon: LineChart, description: "Show trends over time" },
   { type: "area", name: "Area Chart", icon: AreaChart, description: "Visualize cumulative data" },
   { type: "pie", name: "Pie Chart", icon: PieChart, description: "Display proportions" },
+  { type: "donut", name: "Donut Chart", icon: CircleDot, description: "Show proportions with style" },
+  { type: "bubble", name: "Bubble Chart", icon: Droplets, description: "Visualize 3-dimensional data" },
 ]
 
 export function TemplateSelectionScreen({ onSelect, onBack, recommendations }: TemplateSelectionScreenProps) {
   const [selected, setSelected] = useState<ChartType>("bar")
 
-  // Get the top recommendation (if available)
-  const topRecommendation = recommendations && recommendations.length > 0 ? recommendations[0].type : null
+  // Use recommended chart type if available
+  const topRecommendation = recommendations?.[0]?.type
 
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="border-b border-border px-4 py-3 bg-card">
         <div className="flex items-center justify-between">
-          <Image src="/logo.svg" alt="ChartFlow" width={140} height={35} priority />
+          <BrandLogo />
           <ThemeToggle />
         </div>
       </header>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
-        <div className="max-w-2xl w-full space-y-6">
+        <div className="max-w-4xl w-full space-y-6">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-foreground">Choose a template</h1>
             <p className="text-muted-foreground">Select the chart type that best represents your data</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             {templates.map((template) => {
               const isRecommended = topRecommendation === template.type
 
@@ -59,7 +62,7 @@ export function TemplateSelectionScreen({ onSelect, onBack, recommendations }: T
                   className={cn(
                     "p-6 rounded-xl border-2 text-left transition-all relative",
                     "hover:border-primary/50 hover:bg-card",
-                    selected === template.type ? "border-primary bg-card" : "border-border bg-background"
+                    selected === template.type ? "border-primary bg-card" : "border-border bg-card"
                   )}
                 >
                   {isRecommended && (

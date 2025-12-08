@@ -44,7 +44,7 @@ export function DataPanel({ data, onDataChange }: DataPanelProps) {
 
   return (
     <>
-      <div className="space-y-2">
+      <div className="space-y-2 mb-6">
         <Label htmlFor="chart-title" className="text-sm">
           Title
         </Label>

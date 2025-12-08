@@ -7,7 +7,7 @@ import { TemplateSelectionScreen } from "@/components/template-selection-screen"
 import { ChartWorkspace } from "@/components/chart-workspace"
 import type { AIAnalysisResult } from "@/lib/ai-service"
 
-export type ChartType = "bar" | "line" | "area" | "pie"
+export type ChartType = "bar" | "line" | "area" | "pie" | "donut" | "bubble"
 
 export interface ChartData {
   title: string

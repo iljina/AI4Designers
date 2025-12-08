@@ -12,8 +12,11 @@ import {
   PieChart,
   Pie,
   Cell,
+  ScatterChart,
+  Scatter,
   XAxis,
   YAxis,
+  ZAxis,
   CartesianGrid,
   Tooltip,
   Legend,
@@ -28,6 +31,23 @@ interface ChartPreviewProps {
   data: ChartData
   chartType: ChartType
   styles: ChartStyles
+}
+
+// Custom Legend component with black text and colored squares
+const CustomLegend = ({ payload }: any) => {
+  return (
+    <div className="flex justify-center gap-6 mt-4">
+      {payload?.map((entry: any, index: number) => (
+        <div key={`legend-${index}`} className="flex items-center gap-2">
+          <div
+            className="w-4 h-4 rounded-sm"
+            style={{ backgroundColor: entry.color }}
+          />
+          <span className="text-sm text-foreground">{entry.value}</span>
+        </div>
+      ))}
+    </div>
+  )
 }
 
 export function ChartPreview({ data, chartType, styles }: ChartPreviewProps) {
@@ -74,7 +94,7 @@ export function ChartPreview({ data, chartType, styles }: ChartPreviewProps) {
       <XAxis dataKey={labelColumn} stroke="#888" fontSize={12} />
       <YAxis stroke="#888" fontSize={12} />
       <Tooltip contentStyle={tooltipStyle} cursor={{ fill: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)" }} />
-      {showLegend && <Legend />}
+      {showLegend && <Legend content={CustomLegend} />}
       {numericColumns.map((col, i) => (
         <Bar key={col} dataKey={col} fill={colorPalette[i % colorPalette.length]} radius={[4, 4, 0, 0]} />
       ))}
@@ -87,7 +107,7 @@ export function ChartPreview({ data, chartType, styles }: ChartPreviewProps) {
       <XAxis dataKey={labelColumn} stroke="#888" fontSize={12} />
       <YAxis stroke="#888" fontSize={12} />
       <Tooltip contentStyle={tooltipStyle} />
-      {showLegend && <Legend />}
+      {showLegend && <Legend content={CustomLegend} />}
       {numericColumns.map((col, i) => (
         <Line
           key={col}
@@ -107,7 +127,7 @@ export function ChartPreview({ data, chartType, styles }: ChartPreviewProps) {
       <XAxis dataKey={labelColumn} stroke="#888" fontSize={12} />
       <YAxis stroke="#888" fontSize={12} />
       <Tooltip contentStyle={tooltipStyle} />
-      {showLegend && <Legend />}
+      {showLegend && <Legend content={CustomLegend} />}
       {numericColumns.map((col, i) => (
         <Area
           key={col}
@@ -146,8 +166,96 @@ export function ChartPreview({ data, chartType, styles }: ChartPreviewProps) {
           ))}
         </Pie>
         <Tooltip contentStyle={tooltipStyle} itemStyle={{ color: isDark ? "#fff" : "#000" }} />
-        {showLegend && <Legend />}
+        {showLegend && <Legend content={CustomLegend} />}
       </PieChart>
+    )
+  }
+
+  const renderDonutChart = () => {
+    const donutData = data.data.map((row, i) => ({
+      name: String(row[labelColumn] || ""),
+      value: Number(row[numericColumns[0]] || 0),
+      fill: colorPalette[i % colorPalette.length],
+    }))
+
+    return (
+      <PieChart>
+        <Pie
+          data={donutData}
+          dataKey="value"
+          nameKey="name"
+          cx="50%"
+          cy="50%"
+          innerRadius={80}
+          outerRadius={120}
+          label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+          labelLine={{ stroke: "#888" }}
+        >
+          {donutData.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.fill} />
+          ))}
+        </Pie>
+        <Tooltip contentStyle={tooltipStyle} itemStyle={{ color: isDark ? "#fff" : "#000" }} />
+        {showLegend && <Legend content={CustomLegend} />}
+      </PieChart>
+    )
+  }
+
+  // Custom Bubble Shape with text inside
+  const CustomBubbleShape = (props: any) => {
+    const { cx, cy, payload, fill } = props
+    const radius = props.r || 30
+    const label = String(payload[labelColumn] || "")
+    const value = payload[numericColumns[0]] || payload[numericColumns[1]] || ""
+
+    return (
+      <g>
+        <circle cx={cx} cy={cy} r={radius} fill={fill} opacity={0.8} />
+        <text
+          x={cx}
+          y={cy - 5}
+          textAnchor="middle"
+          fill="#fff"
+          fontSize={12}
+          fontWeight="600"
+        >
+          {label}
+        </text>
+        <text
+          x={cx}
+          y={cy + 10}
+          textAnchor="middle"
+          fill="#fff"
+          fontSize={14}
+          fontWeight="700"
+        >
+          {value}
+        </text>
+      </g>
+    )
+  }
+
+  const renderBubbleChart = () => {
+    // For bubble chart, we need at least 2 numeric columns (x, y) and optionally a third for size
+    const xColumn = numericColumns[0] || labelColumn
+    const yColumn = numericColumns[1] || numericColumns[0]
+    const sizeColumn = numericColumns[2] || numericColumns[0]
+
+    return (
+      <ScatterChart margin={{ top: 40, right: 40, bottom: 20, left: 20 }}>
+        {showGrid && <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#333" : "#e5e5e5"} />}
+        <XAxis dataKey={xColumn} stroke="#888" fontSize={12} name={xColumn} />
+        <YAxis dataKey={yColumn} stroke="#888" fontSize={12} name={yColumn} />
+        <ZAxis dataKey={sizeColumn} range={[1000, 4000]} name={sizeColumn} />
+        <Tooltip contentStyle={tooltipStyle} cursor={{ strokeDasharray: "3 3" }} />
+        {showLegend && <Legend content={CustomLegend} />}
+        <Scatter
+          name={data.title}
+          data={data.data}
+          fill={colorPalette[0]}
+          shape={<CustomBubbleShape />}
+        />
+      </ScatterChart>
     )
   }
 
@@ -156,6 +264,8 @@ export function ChartPreview({ data, chartType, styles }: ChartPreviewProps) {
     line: renderLineChart,
     area: renderAreaChart,
     pie: renderPieChart,
+    donut: renderDonutChart,
+    bubble: renderBubbleChart,
   }
 
   return (

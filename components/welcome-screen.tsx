@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { BarChart3, Zap, Sparkles, ArrowRight } from "lucide-react"
 import Image from "next/image"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { BrandLogo } from "@/components/ui/brand-logo"
 
 interface WelcomeScreenProps {
   onStart: () => void
@@ -27,7 +28,6 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
       description: "Export clean, presentation-ready graphics",
     },
   ]
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
       <div className="absolute top-4 right-4">
@@ -36,7 +36,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
       <div className="max-w-2xl w-full text-center space-y-8">
         <div className="space-y-4">
           <div className="flex items-center justify-center mb-6">
-            <Image src="/logo.svg" alt="ChartFlow" width={140} height={35} priority />
+            <BrandLogo />
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold text-foreground text-balance">

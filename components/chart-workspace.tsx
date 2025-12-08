@@ -161,7 +161,7 @@ export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack
         {/* Right Panel - Template & Style */}
         <div className="border-l border-border bg-card flex flex-col" style={{ width: rightPanelOpen ? '288px' : '48px' }}>
           <div className="p-4">
-            <div className="flex items-center justify-between mb-4">
+            <div className={`flex items-center mb-4 ${rightPanelOpen ? 'justify-between' : 'justify-end'}`}>
               {rightPanelOpen && <h2 className="font-semibold text-foreground">Appearance</h2>}
               <Button
                 variant="ghost"
