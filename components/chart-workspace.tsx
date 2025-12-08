@@ -107,28 +107,49 @@ export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack
       const node = chartRef.current
 
       if (format === "png") {
-        const dataUrl = await htmlToImage.toPng(node)
+        const dataUrl = await htmlToImage.toPng(node, {
+          quality: 1.0,
+          pixelRatio: 2, // Higher quality
+        })
         const link = document.createElement("a")
         link.download = `${currentData.title || "chart"}.png`
         link.href = dataUrl
         link.click()
       } else if (format === "svg") {
-        // For SVG, we need to get the SVG string and create a proper SVG blob
-        const svgDataUrl = await htmlToImage.toSvg(node)
+        // For SVG, convert to canvas first (works better with Recharts)
+        const canvas = await htmlToImage.toCanvas(node, {
+          quality: 1.0,
+          pixelRatio: 2,
+        })
 
-        // Convert data URL to blob with proper SVG MIME type
-        const response = await fetch(svgDataUrl)
-        const blob = await response.blob()
-        const svgBlob = new Blob([await blob.text()], { type: 'image/svg+xml' })
+        // Convert canvas to blob
+        canvas.toBlob((blob) => {
+          if (blob) {
+            // Create SVG with embedded PNG image
+            const reader = new FileReader()
+            reader.onloadend = () => {
+              const base64data = reader.result as string
 
-        const url = URL.createObjectURL(svgBlob)
-        const link = document.createElement("a")
-        link.download = `${currentData.title || "chart"}.svg`
-        link.href = url
-        link.click()
+              // Create an SVG with the canvas image embedded
+              const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+     width="${canvas.width}" height="${canvas.height}" viewBox="0 0 ${canvas.width} ${canvas.height}">
+  <image width="${canvas.width}" height="${canvas.height}" xlink:href="${base64data}"/>
+</svg>`
 
-        // Clean up the object URL
-        setTimeout(() => URL.revokeObjectURL(url), 100)
+              const svgBlob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' })
+              const url = URL.createObjectURL(svgBlob)
+              const link = document.createElement("a")
+              link.download = `${currentData.title || "chart"}.svg`
+              link.href = url
+              link.click()
+
+              // Clean up
+              setTimeout(() => URL.revokeObjectURL(url), 100)
+            }
+            reader.readAsDataURL(blob)
+          }
+        }, 'image/png', 1.0)
       }
     } catch (error) {
       console.error("Export failed:", error)
