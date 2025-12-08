@@ -116,36 +116,47 @@ export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack
         link.href = dataUrl
         link.click()
       } else if (format === "svg") {
-        // For SVG with legend and title, use html-to-image which converts the entire card
-        const svgDataUrl = await htmlToImage.toSvg(node, {
-          quality: 1.0,
-          pixelRatio: 1,
+        // Extract the actual SVG element from Recharts (it renders real SVG!)
+        const svgElement = node.querySelector('svg')
+
+        if (!svgElement) {
+          console.error("No SVG element found in chart")
+          return
+        }
+
+        // Clone the SVG to avoid modifying the original
+        const clonedSvg = svgElement.cloneNode(true) as SVGElement
+
+        // Get all elements and apply computed styles inline
+        const allElements = clonedSvg.querySelectorAll('*')
+        allElements.forEach((el) => {
+          const computedStyle = window.getComputedStyle(el as Element)
+          const inlineStyle = Array.from(computedStyle).reduce((acc, prop) => {
+            const value = computedStyle.getPropertyValue(prop)
+            if (value && value !== 'none' && value !== 'normal') {
+              return `${acc}${prop}:${value};`
+            }
+            return acc
+          }, '')
+          if (inlineStyle) {
+            (el as HTMLElement).setAttribute('style', inlineStyle)
+          }
         })
 
-        // Convert data URL to text
-        const response = await fetch(svgDataUrl)
-        const blob = await response.blob()
-        const svgText = await blob.text()
+        // Set proper SVG attributes
+        clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+        clonedSvg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
 
-        // Parse and clean up the SVG
-        const parser = new DOMParser()
-        const svgDoc = parser.parseFromString(svgText, 'image/svg+xml')
-        const svgElement = svgDoc.documentElement
-
-        // Ensure proper namespaces
-        svgElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-        svgElement.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
-
-        // Serialize back to string
+        // Serialize the SVG
         const serializer = new XMLSerializer()
-        let finalSvg = serializer.serializeToString(svgElement)
+        let svgString = serializer.serializeToString(clonedSvg)
 
         // Add XML declaration
-        finalSvg = '<?xml version="1.0" encoding="UTF-8"?>\n' + finalSvg
+        svgString = '<?xml version="1.0" encoding="UTF-8"?>\n' + svgString
 
         // Create blob and download
-        const svgBlob = new Blob([finalSvg], { type: 'image/svg+xml;charset=utf-8' })
-        const url = URL.createObjectURL(svgBlob)
+        const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
+        const url = URL.createObjectURL(blob)
         const link = document.createElement("a")
         link.download = `${currentData.title || "chart"}.svg`
         link.href = url
