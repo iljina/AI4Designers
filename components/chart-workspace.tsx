@@ -105,18 +105,31 @@ export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack
 
     try {
       const node = chartRef.current
-      let dataUrl = ""
 
       if (format === "png") {
-        dataUrl = await htmlToImage.toPng(node)
+        const dataUrl = await htmlToImage.toPng(node)
+        const link = document.createElement("a")
+        link.download = `${currentData.title || "chart"}.png`
+        link.href = dataUrl
+        link.click()
       } else if (format === "svg") {
-        dataUrl = await htmlToImage.toSvg(node)
-      }
+        // For SVG, we need to get the SVG string and create a proper SVG blob
+        const svgDataUrl = await htmlToImage.toSvg(node)
 
-      const link = document.createElement("a")
-      link.download = `${currentData.title || "chart"}.${format}`
-      link.href = dataUrl
-      link.click()
+        // Convert data URL to blob with proper SVG MIME type
+        const response = await fetch(svgDataUrl)
+        const blob = await response.blob()
+        const svgBlob = new Blob([await blob.text()], { type: 'image/svg+xml' })
+
+        const url = URL.createObjectURL(svgBlob)
+        const link = document.createElement("a")
+        link.download = `${currentData.title || "chart"}.svg`
+        link.href = url
+        link.click()
+
+        // Clean up the object URL
+        setTimeout(() => URL.revokeObjectURL(url), 100)
+      }
     } catch (error) {
       console.error("Export failed:", error)
     }
