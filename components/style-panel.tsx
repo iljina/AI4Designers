@@ -19,7 +19,7 @@ interface StylePanelProps {
   onCustomPalettesChange?: (palettes: Array<{ id: string; colors: string[] }>) => void
 }
 
-const DEFAULT_CUSTOM_COLORS = ["#ED2A66", "#FF8A00", "#C6283D", "#FF6B9D", "#FFB347"]
+const DEFAULT_CUSTOM_COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"]
 
 export function StylePanel({
   styles,
