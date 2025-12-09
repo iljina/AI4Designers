@@ -27,7 +27,7 @@ export function ThemeToggle() {
             variant="outline"
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="h-9 w-9"
+            className="h-9 w-9 dark:bg-[#23181C] dark:border-[#32262A] hover:border-input dark:hover:border-[#32262A]"
         >
             {theme === "dark" ? (
                 <Sun className="h-4 w-4" />

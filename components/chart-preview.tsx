@@ -67,7 +67,7 @@ export const ChartPreview = forwardRef<HTMLDivElement, ChartPreviewProps>(
     }, [data])
 
     const tooltipStyle = {
-      backgroundColor: isDark ? "#1a1a2e" : "#ffffff",
+      backgroundColor: isDark ? "#292224" : "#ffffff",
       border: isDark ? "1px solid #333" : "1px solid #e5e5e5",
       borderRadius: "8px",
       color: isDark ? "#fff" : "#000",
@@ -236,6 +236,31 @@ export const ChartPreview = forwardRef<HTMLDivElement, ChartPreviewProps>(
       )
     }
 
+    const CustomBubbleTooltip = ({ active, payload }: any) => {
+      if (active && payload && payload.length) {
+        // Filter out duplicate entries based on name and value
+        const uniqueItems = payload.reduce((acc: any[], item: any) => {
+          const exists = acc.find((i: any) => i.name === item.name && i.value === item.value)
+          if (!exists) {
+            acc.push(item)
+          }
+          return acc
+        }, [])
+
+        return (
+          <div style={{ ...tooltipStyle, padding: "8px 12px" }}>
+            {uniqueItems.map((entry: any, index: number) => (
+              <div key={index} className="flex gap-2 text-sm">
+                <span style={{ color: isDark ? "#fff" : "#000", fontWeight: 500 }}>{entry.name} :</span>
+                <span style={{ color: isDark ? "#ccc" : "#666" }}>{entry.value}</span>
+              </div>
+            ))}
+          </div>
+        )
+      }
+      return null
+    }
+
     const renderBubbleChart = () => {
       // For bubble chart, we need at least 2 numeric columns (x, y) and optionally a third for size
       const xColumn = numericColumns[0] || labelColumn
@@ -248,7 +273,7 @@ export const ChartPreview = forwardRef<HTMLDivElement, ChartPreviewProps>(
           <XAxis dataKey={xColumn} stroke="#888" fontSize={12} name={xColumn} />
           <YAxis dataKey={yColumn} stroke="#888" fontSize={12} name={yColumn} />
           <ZAxis dataKey={sizeColumn} range={[1000, 4000]} name={sizeColumn} />
-          <Tooltip contentStyle={tooltipStyle} cursor={{ strokeDasharray: "3 3" }} />
+          <Tooltip content={<CustomBubbleTooltip />} cursor={{ strokeDasharray: "3 3" }} />
           {showLegend && <Legend content={CustomLegend} />}
           <Scatter
             name={data.title}
@@ -270,7 +295,7 @@ export const ChartPreview = forwardRef<HTMLDivElement, ChartPreviewProps>(
     }
 
     return (
-      <Card ref={ref} className="w-full max-w-3xl">
+      <Card ref={ref} className="w-full max-w-3xl dark:bg-[#150E10]">
         <CardHeader>
           <CardTitle>{data.title}</CardTitle>
         </CardHeader>

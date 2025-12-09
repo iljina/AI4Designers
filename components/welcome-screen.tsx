@@ -49,7 +49,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
 
         <div className="grid gap-4 md:grid-cols-3 text-left">
           {benefits.map((benefit) => (
-            <div key={benefit.title} className="p-4 rounded-xl bg-card border border-border">
+            <div key={benefit.title} className="p-4 rounded-xl bg-card dark:bg-[#150E10] border border-border">
               <benefit.icon className="w-8 h-8 text-primary mb-3" />
               <h3 className="font-semibold text-foreground mb-1">{benefit.title}</h3>
               <p className="text-sm text-muted-foreground">{benefit.description}</p>

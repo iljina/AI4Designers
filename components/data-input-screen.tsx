@@ -113,115 +113,118 @@ export function DataInputScreen({ onSubmit, onAnalyze, onBack }: DataInputScreen
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
-        <div className="max-w-xl w-full space-y-6">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-foreground">Enter your data</h1>
-            <p className="text-muted-foreground">Add your data in any format - AI will analyze it</p>
-          </div>
-
-          <div className="space-y-8">
-            <div className="space-y-2 mb-8">
-              <Label htmlFor="title">Chart Title (optional)</Label>
-              <Input
-                id="title"
-                placeholder="e.g., Quarterly Revenue"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
-
+        <div className="max-w-xl w-full">
+          <div className="bg-card dark:bg-[#150E10] rounded-xl border border-border p-6 shadow-sm space-y-6">
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="data">Data (any format)</Label>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-xs">
-                        <p>Paste raw text, CSV data, or describe your data in plain language. AI will extract and structure it.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Try sample data:{" "}
-                  <button
-                    onClick={loadSimple}
-                    className="text-foreground hover:underline transition-colors"
-                  >
-                    Simple
-                  </button>
-                  {" | "}
-                  <button
-                    onClick={loadComplex}
-                    className="text-foreground hover:underline transition-colors"
-                  >
-                    Complex
-                  </button>
-                </div>
-              </div>
-              <Textarea
-                id="data"
-                placeholder={`Enter your data in any format:\n\nCSV format:\nMonth,Value\nJan,100\nFeb,150\n\nOr raw text:\nSales in Jan were 100, Feb 150, Mar 200`}
-                value={rawData}
-                onChange={(e) => setRawData(e.target.value)}
-                className="min-h-[200px] font-mono text-sm"
-                disabled={isAnalyzing}
-              />
+              <h1 className="text-3xl font-bold text-foreground">Enter your data</h1>
+              <p className="text-muted-foreground">Add your data in any format - AI will analyze it</p>
             </div>
 
-            <div className="flex gap-2 items-center">
-              <div className="relative">
-                <input
-                  type="file"
-                  id="file-upload"
-                  className="hidden"
-                  accept=".csv,.txt,.doc,.docx,.xls,.xlsx"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (!file) return
-
-                    const reader = new FileReader()
-                    reader.onload = (e) => {
-                      const text = e.target?.result as string
-                      setRawData(text)
-                    }
-                    reader.readAsText(file)
-                  }}
+            <div className="space-y-8">
+              <div className="space-y-2 mb-8">
+                <Label htmlFor="title">Chart Title (optional)</Label>
+                <Input
+                  id="title"
+                  placeholder="e.g., Quarterly Revenue"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="bg-background"
                 />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-2 border border-border hover:bg-card hover:border-primary/50"
-                  onClick={() => document.getElementById("file-upload")?.click()}
-                >
-                  <Upload className="w-4 h-4" />
-                  Upload File
-                </Button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Supports DOC, XLS, CSV - AI auto-formatting
-              </p>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="data">Data (any format)</Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>Paste raw text, CSV data, or describe your data in plain language. AI will extract and structure it.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Try sample data:{" "}
+                    <button
+                      onClick={loadSimple}
+                      className="text-foreground hover:underline transition-colors"
+                    >
+                      Simple
+                    </button>
+                    {" | "}
+                    <button
+                      onClick={loadComplex}
+                      className="text-foreground hover:underline transition-colors"
+                    >
+                      Complex
+                    </button>
+                  </div>
+                </div>
+                <Textarea
+                  id="data"
+                  placeholder={`Enter your data in any format:\n\nCSV format:\nMonth,Value\nJan,100\nFeb,150\n\nOr raw text:\nSales in Jan were 100, Feb 150, Mar 200`}
+                  value={rawData}
+                  onChange={(e) => setRawData(e.target.value)}
+                  className="h-[300px] font-mono text-sm bg-background resize-none"
+                  disabled={isAnalyzing}
+                />
+              </div>
+
+              <div className="flex gap-2 items-center">
+                <div className="relative">
+                  <input
+                    type="file"
+                    id="file-upload"
+                    className="hidden"
+                    accept=".csv,.txt,.doc,.docx,.xls,.xlsx"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (!file) return
+
+                      const reader = new FileReader()
+                      reader.onload = (e) => {
+                        const text = e.target?.result as string
+                        setRawData(text)
+                      }
+                      reader.readAsText(file)
+                    }}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2 border border-input hover:bg-accent hover:text-accent-foreground hover:border-input"
+                    onClick={() => document.getElementById("file-upload")?.click()}
+                  >
+                    <Upload className="w-4 h-4" />
+                    Upload File
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Supports DOC, XLS, CSV - AI auto-formatting
+                </p>
+              </div>
+
+              {error && <p className="text-sm text-destructive">{error}</p>}
             </div>
 
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            <Button onClick={handleContinue} className="w-full gap-2" disabled={isAnalyzing}>
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  Continue
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </Button>
           </div>
-
-          <Button onClick={handleContinue} className="w-full gap-2" disabled={isAnalyzing}>
-            {isAnalyzing ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Analyzing...
-              </>
-            ) : (
-              <>
-                Continue
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </Button>
         </div>
       </div>
     </div>

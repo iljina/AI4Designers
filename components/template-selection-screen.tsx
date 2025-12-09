@@ -93,7 +93,7 @@ export function TemplateSelectionScreen({ onSelect, onBack, recommendations }: T
           </div>
 
           <div className="flex gap-3">
-            <Button variant="secondary" onClick={onBack} className="flex-1 hover:bg-card">
+            <Button variant="ghost" onClick={onBack} className="flex-1 bg-[#F0F0F0] hover:bg-[#E5E5E5] dark:bg-[#291D20] dark:hover:bg-[#2D2629]">
               Back
             </Button>
             <Button onClick={() => onSelect(selected)} className="flex-1">

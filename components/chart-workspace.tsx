@@ -26,23 +26,23 @@ export interface ChartStyles {
 }
 
 const colorPalettes = {
-  default: ["#ED2A66", "#FF8A00", "#C6283D", "#FF6B9D", "#FFB347"],
-  ocean: ["#0077b6", "#00b4d8", "#90e0ef", "#caf0f8", "#03045e"],
-  sunset: ["#FF2D6D", "#FF8A00", "#FFB347", "##FF6B9D", "#C6283D"],
-  forest: ["#2d6a4f", "#40916c", "#52b788", "#74c69d", "#95d5b2"],
-  monochrome: ["#450C23", "#6B1A3A", "#8B2A4A", "#AB3A5A", "#CB4A6A"],
+  sunset: ["#F5055C", "#F68E1E", "#D1052E", "#F45D94", "#FEB922"],
+  ocean: ["#0075B6", "#04B6D2", "#5A96F9", "#82E2F7", "#7A61FF"],
+  nature: ["#217C76", "#3BC9A0", "#EDC05D", "#F39D52", "#F76648"],
+  rainbow: ["#FF62B0", "#C68DFF", "#748DFF", "#3FA8F4", "#12E29B"],
+  monochrome: ["#63738A", "#C4CCD6", "#323C4E", "#9BA5B4", "#4F596B"],
 }
 
 export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack }: ChartWorkspaceProps) {
   const chartRef = useRef<HTMLDivElement>(null)
   const [styles, setStyles] = useState<ChartStyles>({
-    colorPalette: colorPalettes.default,
+    colorPalette: colorPalettes.sunset,
     showGrid: true,
     showLegend: true,
   })
   const [currentData, setCurrentData] = useState(chartData)
   const [showExport, setShowExport] = useState(false)
-  const [selectedPalette, setSelectedPalette] = useState<string>("default")
+  const [selectedPalette, setSelectedPalette] = useState<string>("sunset")
   const [customPalettes, setCustomPalettes] = useState<Array<{ id: string; colors: string[] }>>([])
   const [leftPanelOpen, setLeftPanelOpen] = useState(true)
   const [rightPanelOpen, setRightPanelOpen] = useState(true)
@@ -173,9 +173,9 @@ export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="border-b border-border px-4 py-3 flex items-center justify-between bg-card">
+      <header className="border-b border-border px-4 py-3 flex items-center justify-between bg-card dark:bg-[#150E10]">
         <div className="flex items-center gap-4">
-          <Button variant="secondary" size="sm" onClick={onBack} className="gap-2 hover:bg-card">
+          <Button variant="ghost" size="sm" onClick={onBack} className="gap-2 bg-[#F0F0F0] hover:bg-[#E5E5E5] dark:bg-[#291D20] dark:hover:bg-[#2D2629]">
             <ArrowLeft className="w-4 h-4" />
             Back to Start
           </Button>
@@ -194,7 +194,7 @@ export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack
         {/* Left Panel - Data */}
         <>
           <div
-            className="border-r border-border bg-card overflow-y-auto"
+            className="border-r border-border bg-card dark:bg-[#150E10] overflow-y-auto"
             style={{ width: leftPanelOpen ? `${leftPanelWidth}px` : '48px' }}
           >
             <div className="p-4">
@@ -231,7 +231,7 @@ export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack
         </div>
 
         {/* Right Panel - Template & Style */}
-        <div className="border-l border-border bg-card flex flex-col" style={{ width: rightPanelOpen ? '288px' : '48px' }}>
+        <div className="border-l border-border bg-card dark:bg-[#150E10] flex flex-col" style={{ width: rightPanelOpen ? '288px' : '48px' }}>
           <div className="p-4">
             <div className={`flex items-center mb-4 ${rightPanelOpen ? 'justify-between' : 'justify-end'}`}>
               {rightPanelOpen && <h2 className="font-semibold text-foreground">Appearance</h2>}

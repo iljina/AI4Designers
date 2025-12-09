@@ -78,7 +78,7 @@ export function StylePanel({
 
       // If deleted palette was selected, switch to default
       if (selectedPalette === id) {
-        onPaletteChange("default")
+        onPaletteChange("sunset")
       }
     }
   }

@@ -19,20 +19,26 @@ export function BrandLogo({ width = 140, height = 35, className }: BrandLogoProp
     }, [])
 
     if (!mounted) {
-        return <Image src="/logo.svg" alt="Chartyaka" width={width} height={height} className={className} priority />
+        return (
+            <a href="/">
+                <Image src="/logo.svg" alt="Chartyaka" width={width} height={height} className={className} priority />
+            </a>
+        )
     }
 
     // Use the new light logo for light theme, regular logo for dark theme
     const src = resolvedTheme === "light" ? "/logo-light.png" : "/logo.svg"
 
     return (
-        <Image
-            src={src}
-            alt="Chartyaka"
-            width={width}
-            height={height}
-            className={className}
-            priority
-        />
+        <a href="/">
+            <Image
+                src={src}
+                alt="Chartyaka"
+                width={width}
+                height={height}
+                className={className}
+                priority
+            />
+        </a>
     )
 }
