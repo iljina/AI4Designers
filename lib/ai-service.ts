@@ -1,4 +1,4 @@
-import type { ChartType } from "@/app/page"
+import type { ChartType } from "@/lib/chart-storage"
 
 export interface AIAnalysisResult {
     title: string
@@ -60,6 +60,8 @@ Return ONLY valid JSON in this exact format:
 }
 
 Rules:
+- If the input contains a huge list of transactions (more than 20 rows), DO NOT return every single row. Instead, AGGREGATE the data by a meaningful dimension (e.g., Sum of Revenue by Region, Count of Sales by Category, or Monthly Sales).
+- Provide a summary dataset of 10-30 rows maximum that represents the full dataset.
 - Always include at least one label column (string) and one numeric column
 - Recommend 2-4 chart types ordered by suitability
 - Confidence score from 0-100
