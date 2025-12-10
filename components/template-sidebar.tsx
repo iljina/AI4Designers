@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { BarChart3, LineChart, AreaChart, PieChart, CircleDot, Droplets, Radar, LayoutGrid, Grid } from "lucide-react"
-import type { ChartType } from "@/app/page"
+import type { ChartType } from "@/lib/chart-storage"
 import { cn } from "@/lib/utils"
 
 interface TemplateSidebarProps {
@@ -20,7 +20,6 @@ const chartTypes: { type: ChartType; icon: React.ElementType; name: string }[] =
   { type: "bubble", icon: Droplets, name: "Bubble" },
   { type: "radar", icon: Radar, name: "Radar" },
   { type: "treemap", icon: LayoutGrid, name: "Treemap" },
-  { type: "heatmap", icon: Grid, name: "Heatmap" },
 ]
 
 export function TemplateSidebar({ selectedType, onTypeChange }: TemplateSidebarProps) {

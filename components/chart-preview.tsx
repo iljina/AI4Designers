@@ -363,16 +363,6 @@ export const ChartPreview = forwardRef<HTMLDivElement, ChartPreviewProps>(
       )
     }
 
-    const renderHeatmapChart = () => {
-      // Placeholder
-      return (
-        <div className="flex h-full items-center justify-center text-muted-foreground">
-          Heatmap requires specific X/Y/Value format. Use Bubble chart for now.
-        </div>
-      )
-    }
-
-
     const chartComponents: Record<ChartType, () => React.ReactElement> = {
       bar: renderBarChart,
       line: renderLineChart,
@@ -382,7 +372,6 @@ export const ChartPreview = forwardRef<HTMLDivElement, ChartPreviewProps>(
       bubble: renderBubbleChart,
       radar: renderRadarChart,
       treemap: renderTreemapChart,
-      heatmap: renderHeatmapChart,
     }
 
     return (

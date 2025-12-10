@@ -34,7 +34,7 @@ Return ONLY valid JSON in this exact format:
   "columns": ["column1", "column2"],
   "recommendations": [
     {
-      "type": "bar" | "line" | "area" | "pie" | "donut" | "bubble" | "radar" | "treemap" | "heatmap",
+      "type": "bar" | "line" | "area" | "pie" | "donut" | "bubble" | "radar" | "treemap",
       "confidence": 0-100,
       "reason": "brief explanation"
     }
