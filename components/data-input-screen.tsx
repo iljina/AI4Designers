@@ -7,21 +7,17 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowRight, HelpCircle, Upload, Loader2 } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import type { ChartData } from "@/app/page"
-import Image from "next/image"
+import type { ChartData } from "@/lib/chart-storage"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { BrandLogo } from "@/components/ui/brand-logo"
-import { analyzeDataWithAI, parseCSVFallback, type AIAnalysisResult } from "@/lib/ai-service"
+import { parseCSVFallback, type AIAnalysisResult } from "@/lib/ai-service"
+import { analyzeData } from "@/app/actions"
 
 interface DataInputScreenProps {
   onSubmit: (data: ChartData) => void
   onAnalyze: (result: AIAnalysisResult) => void
   onBack: () => void
 }
-// ... (CSV constants remain implicitly the same, but I need to focus on replacement area)
-
-// I will target a larger block to clean up the mess
-
 
 const sampleCSV = `Month,Sales,Expenses
 January,4000,2400
@@ -62,7 +58,7 @@ export function DataInputScreen({ onSubmit, onAnalyze, onBack }: DataInputScreen
 
     try {
       // Try AI analysis first
-      const result = await analyzeDataWithAI(rawData)
+      const result = await analyzeData(rawData)
       setTitle(result.title)
       onAnalyze(result)
     } catch (err) {
@@ -180,7 +176,6 @@ export function DataInputScreen({ onSubmit, onAnalyze, onBack }: DataInputScreen
                     onChange={(e) => {
                       const file = e.target.files?.[0]
                       if (!file) return
-
                       const reader = new FileReader()
                       reader.onload = (e) => {
                         const text = e.target?.result as string
