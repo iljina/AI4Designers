@@ -3,9 +3,9 @@
 import type React from "react"
 
 import { Button } from "@/components/ui/button"
-import { BarChart3, LineChart, AreaChart, PieChart, CircleDot, Droplets, Check } from "lucide-react"
+import { BarChart3, LineChart, AreaChart, PieChart, CircleDot, Droplets, Check, Radar, LayoutGrid } from "lucide-react"
 import { useState } from "react"
-import type { ChartType } from "@/app/page"
+import type { ChartType } from "@/lib/chart-storage"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -25,6 +25,8 @@ const templates: { type: ChartType; name: string; icon: React.ElementType; descr
   { type: "pie", name: "Pie Chart", icon: PieChart, description: "Display proportions" },
   { type: "donut", name: "Donut Chart", icon: CircleDot, description: "Show proportions with style" },
   { type: "bubble", name: "Bubble Chart", icon: Droplets, description: "Visualize 3-dimensional data" },
+  { type: "radar", name: "Radar Chart", icon: Radar, description: "Compare multivariate data" },
+  { type: "treemap", name: "Treemap", icon: LayoutGrid, description: "Visualize hierarchical data" },
 ]
 
 export function TemplateSelectionScreen({ onSelect, onBack, recommendations }: TemplateSelectionScreenProps) {
