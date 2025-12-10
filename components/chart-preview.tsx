@@ -1,14 +1,58 @@
-<div className="flex flex-wrap justify-center gap-4 mt-4 px-4">
-  {payload?.map((entry: any, index: number) => (
-    <div key={`legend-${index}`} className="flex items-center gap-2">
-      <div
-        className="w-4 h-4 rounded-sm flex-shrink-0"
-        style={{ backgroundColor: entry.color }}
-      />
-      <span className="text-sm text-foreground whitespace-nowrap">{entry.value}</span>
+"use client"
+
+import { useMemo, forwardRef } from "react"
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+  ScatterChart,
+  Scatter,
+  XAxis,
+  YAxis,
+  ZAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Treemap,
+} from "recharts"
+import type { ChartType, ChartData } from "@/app/page"
+import type { ChartStyles } from "@/components/chart-workspace"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useTheme } from "next-themes"
+import type React from "react"
+
+interface ChartPreviewProps {
+  data: ChartData
+  chartType: ChartType
+  styles: ChartStyles
+}
+
+// Custom Legend component with black text and colored squares
+const CustomLegend = ({ payload }: any) => {
+  return (
+    <div className="flex flex-wrap justify-center gap-4 mt-4 px-4">
+      {payload?.map((entry: any, index: number) => (
+        <div key={`legend-${index}`} className="flex items-center gap-2">
+          <div
+            className="w-4 h-4 rounded-sm flex-shrink-0"
+            style={{ backgroundColor: entry.color }}
+          />
+          <span className="text-sm text-foreground whitespace-nowrap">{entry.value}</span>
+        </div>
+      ))}
     </div>
-  ))}
-</div>
   )
 }
 
@@ -320,12 +364,7 @@ export const ChartPreview = forwardRef<HTMLDivElement, ChartPreviewProps>(
     }
 
     const renderHeatmapChart = () => {
-      // Simple simulation of heatmap using ScatterChart with formatted data
-      // We need X and Y keys. If data is pivoted (Month, Region1, Region2...), we need to unpivot visually or treat it as points
-      // For standard "heatmap", we ideally want 3 cols: X, Y, Value.
-      // Let's assume the user provided pivoted data (Month, Region...) and we map it.
-      // Actually, let's just implement a placeholder for Heatmap using standard Scatter for now as a fallback
-      // to avoid complex data transformation logic errors here.
+      // Placeholder
       return (
         <div className="flex h-full items-center justify-center text-muted-foreground">
           Heatmap requires specific X/Y/Value format. Use Bubble chart for now.
@@ -343,7 +382,7 @@ export const ChartPreview = forwardRef<HTMLDivElement, ChartPreviewProps>(
       bubble: renderBubbleChart,
       radar: renderRadarChart,
       treemap: renderTreemapChart,
-      heatmap: renderHeatmapChart, // Placeholder
+      heatmap: renderHeatmapChart,
     }
 
     return (
