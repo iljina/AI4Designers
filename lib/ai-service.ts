@@ -61,8 +61,11 @@ Return ONLY valid JSON in this exact format:
 
 Rules:
 - **CRITICAL**: If the input contains dates or timestamps (e.g., logs, time-series), **PRIORITIZE** aggregating by time (e.g., "Revenue by Month", "Log Counts by Day", "Activity by Hour"). This provides the most valuable trend view.
-- If no dates are present, aggregate by the most diverse category to ensure a rich chart.
-- **Target Data Density**: Aim for **12-30 data points** in the result. A chart with only 3-5 bars often feels empty. If your aggregation yields too few points, choose a more granular unit (e.g., Weekly instead of Monthly, or include Top 15 Categories).
+- **ENABLE MULTI-SERIES**: If there is a categorical field (like Region, Department, Device), **PIVOT** the data so that each category becomes its own column.
+  - BAD: `[{ "month": "Jan", "region": "North America", "sales": 100 }, { "month": "Jan", "region": "Europe", "sales": 80 }]`
+  - GOOD: `[{ "month": "Jan", "North America": 100, "Europe": 80 }]`
+  - This allows the chart to show multiple comparing lines/bars, which is much richer than a single line.
+- **Target Data Density**: Aim for **12-30 data points** (rows) in the result.
 - **AGGREGATION**: If the input is a raw list of transactions (>20 rows), you **MUST** aggregate. Do not return raw rows.
 - Always include at least one label column (string) and one numeric column.
 - Recommend 2-4 chart types ordered by suitability.
