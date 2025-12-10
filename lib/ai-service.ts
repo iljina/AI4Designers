@@ -60,12 +60,14 @@ Return ONLY valid JSON in this exact format:
 }
 
 Rules:
-- If the input contains a huge list of transactions (more than 20 rows), DO NOT return every single row. Instead, AGGREGATE the data by a meaningful dimension (e.g., Sum of Revenue by Region, Count of Sales by Category, or Monthly Sales).
-- Provide a summary dataset of 10-30 rows maximum that represents the full dataset.
-- Always include at least one label column (string) and one numeric column
-- Recommend 2-4 chart types ordered by suitability
-- Confidence score from 0-100
-- Keep data clean and well-structured`,
+- **CRITICAL**: If the input contains dates or timestamps (e.g., logs, time-series), **PRIORITIZE** aggregating by time (e.g., "Revenue by Month", "Log Counts by Day", "Activity by Hour"). This provides the most valuable trend view.
+- If no dates are present, aggregate by the most diverse category to ensure a rich chart.
+- **Target Data Density**: Aim for **12-30 data points** in the result. A chart with only 3-5 bars often feels empty. If your aggregation yields too few points, choose a more granular unit (e.g., Weekly instead of Monthly, or include Top 15 Categories).
+- **AGGREGATION**: If the input is a raw list of transactions (>20 rows), you **MUST** aggregate. Do not return raw rows.
+- Always include at least one label column (string) and one numeric column.
+- Recommend 2-4 chart types ordered by suitability.
+- Confidence score from 0-100.
+- Keep data clean and well-structured.`,
                     },
                     {
                         role: "user",
