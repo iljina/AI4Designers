@@ -127,25 +127,27 @@ export function WelcomeScreen({ onStart, onLoadChart }: WelcomeScreenProps) {
                 <div
                   key={chart.id}
                   onClick={() => onLoadChart(chart)}
-                  className="group relative p-4 rounded-xl bg-card border border-border hover:border-primary/50 hover:bg-muted/50 transition-all cursor-pointer flex flex-col gap-2"
+                  className="group relative p-4 h-32 rounded-xl bg-card border border-border hover:border-primary/50 hover:bg-muted/50 transition-all cursor-pointer flex flex-col justify-between"
                 >
-                  <div className="flex justify-between items-start">
-                    <div className=" space-y-1">
-                      <h3 className="font-medium truncate pr-6 text-foreground">{chart.title}</h3>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground capitalize">
-                        <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded">{chart.type}</span>
-                        <span>{new Date(chart.lastModified).toLocaleString()}</span>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-2 right-2 h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive hover:bg-destructive/10"
-                      onClick={(e: React.MouseEvent) => handleDelete(e, chart.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                  <div className="w-full">
+                    <h3 className="font-medium line-clamp-2 pr-6 text-foreground leading-snug" title={chart.title}>
+                      {chart.title}
+                    </h3>
                   </div>
+
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground capitalize">
+                    <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded">{chart.type}</span>
+                    <span>{new Date(chart.lastModified).toLocaleString(undefined, { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive hover:bg-destructive/10"
+                    onClick={(e: React.MouseEvent) => handleDelete(e, chart.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               ))}
             </div>

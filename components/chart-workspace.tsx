@@ -156,66 +156,44 @@ export function ChartWorkspace({
     if (!chartRef.current) return
 
     try {
+      // Find the chart container div
       const node = chartRef.current
 
+      // Filter out elements that should not be in the export (e.g. any resize handles or control overlays if they exist)
+      // For now, we assume chartRef points to the container wrapping the chart and legend
+
+      const filter = (node: HTMLElement) => {
+        const exclusionClasses = ["resize-handle", "control-overlay"]
+        return !exclusionClasses.some((classname) => node.classList?.contains(classname))
+      }
+
       if (format === "png") {
+        // Simple delay to ensure fonts/layout are ready
+        await new Promise((resolve) => setTimeout(resolve, 100))
+
         const dataUrl = await htmlToImage.toPng(node, {
           quality: 1.0,
           pixelRatio: 2,
+          filter: filter,
+          backgroundColor: window.getComputedStyle(node).backgroundColor || '#ffffff', // Ensure background is captured
         })
         const link = document.createElement("a")
         link.download = `${currentData.title || "chart"}.png`
         link.href = dataUrl
         link.click()
       } else if (format === "svg") {
-        // Extract the actual SVG element from Recharts (it renders real SVG!)
-        const svgElement = node.querySelector('svg')
+        await new Promise((resolve) => setTimeout(resolve, 100))
 
-        if (!svgElement) {
-          console.error("No SVG element found in chart")
-          return
-        }
-
-        // Clone the SVG to avoid modifying the original
-        const clonedSvg = svgElement.cloneNode(true) as SVGElement
-
-        // Get all elements and apply computed styles inline
-        const allElements = clonedSvg.querySelectorAll('*')
-        allElements.forEach((el) => {
-          const computedStyle = window.getComputedStyle(el as Element)
-          const inlineStyle = Array.from(computedStyle).reduce((acc, prop) => {
-            const value = computedStyle.getPropertyValue(prop)
-            if (value && value !== 'none' && value !== 'normal') {
-              return `${acc}${prop}:${value};`
-            }
-            return acc
-          }, '')
-          if (inlineStyle) {
-            (el as HTMLElement).setAttribute('style', inlineStyle)
-          }
+        // Use html-to-image for SVG as well to capture HTML legends
+        const dataUrl = await htmlToImage.toSvg(node, {
+          filter: filter,
+          backgroundColor: window.getComputedStyle(node).backgroundColor || '#ffffff',
         })
 
-        // Set proper SVG attributes
-        clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-        clonedSvg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
-
-        // Serialize the SVG
-        const serializer = new XMLSerializer()
-        let svgString = serializer.serializeToString(clonedSvg)
-
-        // Add XML declaration
-        svgString = '<?xml version="1.0" encoding="UTF-8"?>\n' + svgString
-
-        // Create blob and download
-        const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
-        const url = URL.createObjectURL(blob)
         const link = document.createElement("a")
         link.download = `${currentData.title || "chart"}.svg`
-        link.href = url
+        link.href = dataUrl
         link.click()
-
-        // Clean up
-        setTimeout(() => URL.revokeObjectURL(url), 100)
       }
     } catch (error) {
       console.error("Export failed:", error)
