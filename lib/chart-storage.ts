@@ -1,4 +1,4 @@
-export type ChartType = "bar" | "line" | "area" | "pie" | "donut" | "bubble"
+export type ChartType = "bar" | "line" | "area" | "pie" | "donut" | "bubble" | "radar" | "treemap" | "heatmap"
 
 export interface ChartData {
     title: string

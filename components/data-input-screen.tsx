@@ -69,17 +69,13 @@ export function DataInputScreen({ onSubmit, onAnalyze, onBack }: DataInputScreen
       console.error("AI analysis failed, falling back to manual mode:", err)
 
       // Fallback to manual CSV parsing
-      if (!title.trim()) {
-        setError("Please enter a chart title for manual mode")
-        setIsAnalyzing(false)
-        return
-      }
+      const effectiveTitle = title.trim() || "Untitled Chart"
 
       try {
         const parsed = parseCSVFallback(rawData)
         setError("")
         onSubmit({
-          title: title.trim(),
+          title: effectiveTitle,
           data: parsed.data,
           columns: parsed.columns,
         })

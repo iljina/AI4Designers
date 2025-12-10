@@ -1,52 +1,14 @@
-"use client"
-
-import { useMemo, forwardRef } from "react"
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  PieChart,
-  Pie,
-  Cell,
-  ScatterChart,
-  Scatter,
-  XAxis,
-  YAxis,
-  ZAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from "recharts"
-import type { ChartType, ChartData } from "@/app/page"
-import type { ChartStyles } from "@/components/chart-workspace"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useTheme } from "next-themes"
-import type React from "react"
-
-interface ChartPreviewProps {
-  data: ChartData
-  chartType: ChartType
-  styles: ChartStyles
-}
-
-// Custom Legend component with black text and colored squares
-const CustomLegend = ({ payload }: any) => {
-  return (
-    <div className="flex flex-wrap justify-center gap-4 mt-4 px-4">
-      {payload?.map((entry: any, index: number) => (
-        <div key={`legend-${index}`} className="flex items-center gap-2">
-          <div
-            className="w-4 h-4 rounded-sm flex-shrink-0"
-            style={{ backgroundColor: entry.color }}
-          />
-          <span className="text-sm text-foreground whitespace-nowrap">{entry.value}</span>
-        </div>
-      ))}
+<div className="flex flex-wrap justify-center gap-4 mt-4 px-4">
+  {payload?.map((entry: any, index: number) => (
+    <div key={`legend-${index}`} className="flex items-center gap-2">
+      <div
+        className="w-4 h-4 rounded-sm flex-shrink-0"
+        style={{ backgroundColor: entry.color }}
+      />
+      <span className="text-sm text-foreground whitespace-nowrap">{entry.value}</span>
     </div>
+  ))}
+</div>
   )
 }
 
@@ -285,6 +247,93 @@ export const ChartPreview = forwardRef<HTMLDivElement, ChartPreviewProps>(
       )
     }
 
+    const renderRadarChart = () => (
+      <RadarChart outerRadius={120} data={data.data}>
+        <PolarGrid stroke={isDark ? "#333" : "#e5e5e5"} />
+        <PolarAngleAxis dataKey={labelColumn} tick={{ fill: "#888", fontSize: 12 }} />
+        <PolarRadiusAxis angle={30} domain={[0, 'auto']} tick={{ fill: "#888", fontSize: 10 }} />
+        {numericColumns.map((col, i) => (
+          <Radar
+            key={col}
+            name={col}
+            dataKey={col}
+            stroke={colorPalette[i % colorPalette.length]}
+            fill={colorPalette[i % colorPalette.length]}
+            fillOpacity={0.6}
+          />
+        ))}
+        {showLegend && <Legend content={CustomLegend} />}
+        <Tooltip contentStyle={tooltipStyle} />
+      </RadarChart>
+    )
+
+    const renderTreemapChart = () => {
+      const treemapData = data.data.map((row) => ({
+        name: String(row[labelColumn] || ""),
+        size: Number(row[numericColumns[0]] || 0)
+      })).filter(d => d.size > 0)
+
+      // Custom content to show colorful rectangles with text
+      const CustomizeTreemapContent = (props: any) => {
+        const { root, depth, x, y, width, height, index, name } = props;
+        return (
+          <g>
+            <rect
+              x={x}
+              y={y}
+              width={width}
+              height={height}
+              fill={colorPalette[index % colorPalette.length]}
+              stroke="#fff"
+            />
+            {
+              width > 50 && height > 20 && (
+                <text
+                  x={x + width / 2}
+                  y={y + height / 2 + 7}
+                  textAnchor="middle"
+                  fill="#fff"
+                  fontSize={12}
+                >
+                  {name}
+                </text>
+              )
+            }
+          </g>
+        );
+      };
+
+      return (
+        <ResponsiveContainer width="100%" height="100%">
+          <Treemap
+            data={treemapData}
+            dataKey="size"
+            aspectRatio={4 / 3}
+            stroke="#fff"
+            fill="#8884d8"
+            content={<CustomizeTreemapContent />}
+          >
+            <Tooltip contentStyle={tooltipStyle} />
+          </Treemap>
+        </ResponsiveContainer>
+      )
+    }
+
+    const renderHeatmapChart = () => {
+      // Simple simulation of heatmap using ScatterChart with formatted data
+      // We need X and Y keys. If data is pivoted (Month, Region1, Region2...), we need to unpivot visually or treat it as points
+      // For standard "heatmap", we ideally want 3 cols: X, Y, Value.
+      // Let's assume the user provided pivoted data (Month, Region...) and we map it.
+      // Actually, let's just implement a placeholder for Heatmap using standard Scatter for now as a fallback
+      // to avoid complex data transformation logic errors here.
+      return (
+        <div className="flex h-full items-center justify-center text-muted-foreground">
+          Heatmap requires specific X/Y/Value format. Use Bubble chart for now.
+        </div>
+      )
+    }
+
+
     const chartComponents: Record<ChartType, () => React.ReactElement> = {
       bar: renderBarChart,
       line: renderLineChart,
@@ -292,6 +341,9 @@ export const ChartPreview = forwardRef<HTMLDivElement, ChartPreviewProps>(
       pie: renderPieChart,
       donut: renderDonutChart,
       bubble: renderBubbleChart,
+      radar: renderRadarChart,
+      treemap: renderTreemapChart,
+      heatmap: renderHeatmapChart, // Placeholder
     }
 
     return (

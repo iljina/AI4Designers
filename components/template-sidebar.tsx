@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { BarChart3, LineChart, AreaChart, PieChart, CircleDot, Droplets } from "lucide-react"
+import { BarChart3, LineChart, AreaChart, PieChart, CircleDot, Droplets, Radar, LayoutGrid, Grid } from "lucide-react"
 import type { ChartType } from "@/app/page"
 import { cn } from "@/lib/utils"
 
@@ -18,6 +18,9 @@ const chartTypes: { type: ChartType; icon: React.ElementType; name: string }[] =
   { type: "pie", icon: PieChart, name: "Pie" },
   { type: "donut", icon: CircleDot, name: "Donut" },
   { type: "bubble", icon: Droplets, name: "Bubble" },
+  { type: "radar", icon: Radar, name: "Radar" },
+  { type: "treemap", icon: LayoutGrid, name: "Treemap" },
+  { type: "heatmap", icon: Grid, name: "Heatmap" },
 ]
 
 export function TemplateSidebar({ selectedType, onTypeChange }: TemplateSidebarProps) {
