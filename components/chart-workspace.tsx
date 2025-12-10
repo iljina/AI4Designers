@@ -11,6 +11,7 @@ import { ExportModal } from "@/components/export-modal"
 import { ThemeToggle } from "@/components/theme-toggle"
 import * as htmlToImage from "html-to-image"
 import { ChartType, ChartData, ChartStyles, saveChart } from "@/lib/chart-storage"
+import { useToast } from "@/components/ui/use-toast"
 
 interface ChartWorkspaceProps {
   chartData: ChartData
@@ -152,22 +153,24 @@ export function ChartWorkspace({
     setIsResizing(!isResizing)
   }
 
+  const { toast } = useToast()
+
   const handleExport = async (format: "png" | "svg") => {
     if (!chartRef.current) return
 
+    toast({
+      title: "Starting export...",
+      description: "Preparing your file for download.",
+    })
+
     try {
-      // Find the chart container div
-      const node = chartRef.current
-
-      // Filter out elements that should not be in the export (e.g. any resize handles or control overlays if they exist)
-      // For now, we assume chartRef points to the container wrapping the chart and legend
-
-      const filter = (node: HTMLElement) => {
-        const exclusionClasses = ["resize-handle", "control-overlay"]
-        return !exclusionClasses.some((classname) => node.classList?.contains(classname))
-      }
-
       if (format === "png") {
+        const node = chartRef.current
+        const filter = (node: HTMLElement) => {
+          const exclusionClasses = ["resize-handle", "control-overlay"]
+          return !exclusionClasses.some((classname) => node.classList?.contains(classname))
+        }
+
         // Simple delay to ensure fonts/layout are ready
         await new Promise((resolve) => setTimeout(resolve, 100))
 
@@ -175,28 +178,117 @@ export function ChartWorkspace({
           quality: 1.0,
           pixelRatio: 2,
           filter: filter,
-          backgroundColor: window.getComputedStyle(node).backgroundColor || '#ffffff', // Ensure background is captured
+          backgroundColor: window.getComputedStyle(node).backgroundColor || '#ffffff',
         })
         const link = document.createElement("a")
         link.download = `${currentData.title || "chart"}.png`
         link.href = dataUrl
         link.click()
-      } else if (format === "svg") {
-        await new Promise((resolve) => setTimeout(resolve, 100))
 
-        // Use html-to-image for SVG as well to capture HTML legends
-        const dataUrl = await htmlToImage.toSvg(node, {
-          filter: filter,
-          backgroundColor: window.getComputedStyle(node).backgroundColor || '#ffffff',
+        toast({
+          title: "Export successful",
+          description: "Your PNG file has been downloaded.",
         })
+      } else if (format === "svg") {
+        const node = chartRef.current
+        const originalSvg = node.querySelector('svg')
+        if (!originalSvg) throw new Error("Chart SVG not found")
+
+        // 1. Clone the SVG
+        const clonedSvg = originalSvg.cloneNode(true) as SVGElement
+
+        // 2. Ensure namespace
+        clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+
+        // 3. Inline styles for standard elements
+        const allElements = clonedSvg.querySelectorAll('*')
+        allElements.forEach((el) => {
+          const computedStyle = window.getComputedStyle(el as Element)
+          const props = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'opacity']
+          let inlineStyle = ''
+          props.forEach(prop => {
+            const val = computedStyle.getPropertyValue(prop)
+            if (val) inlineStyle += `${prop}:${val};`
+          })
+          if (inlineStyle) (el as HTMLElement).setAttribute('style', inlineStyle)
+        })
+
+        // 4. Manually construct Legend if needed
+        if (styles.showLegend) {
+          let legendItems: Array<{ label: string, color: string }> = []
+
+          if (['pie', 'donut'].includes(chartType)) {
+            legendItems = currentData.data.map((row, i) => ({
+              label: String(row[currentData.columns[0]]),
+              color: styles.colorPalette[i % styles.colorPalette.length]
+            }))
+          } else {
+            legendItems = currentData.columns.slice(1).map((col, i) => ({
+              label: col,
+              color: styles.colorPalette[i % styles.colorPalette.length]
+            }))
+          }
+
+          const legendGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+          let currentX = 20
+          // Use baseVal.height if available, else clientHeight, else fallback
+          const svgHeight = originalSvg.viewBox?.baseVal?.height || originalSvg.clientHeight || 300
+          const legendY = svgHeight + 20
+
+          legendItems.forEach(item => {
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+            rect.setAttribute('x', String(currentX))
+            rect.setAttribute('y', String(legendY))
+            rect.setAttribute('width', '12')
+            rect.setAttribute('height', '12')
+            rect.setAttribute('rx', '2')
+            rect.setAttribute('fill', item.color)
+            legendGroup.appendChild(rect)
+
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+            text.setAttribute('x', String(currentX + 16))
+            text.setAttribute('y', String(legendY + 10))
+            text.setAttribute('font-family', 'sans-serif')
+            text.setAttribute('font-size', '12px')
+            const isDark = document.documentElement.classList.contains('dark')
+            text.setAttribute('fill', isDark ? '#ffffff' : '#000000')
+            text.textContent = item.label
+            legendGroup.appendChild(text)
+
+            currentX += 20 + (item.label.length * 8) + 20
+          })
+
+          clonedSvg.appendChild(legendGroup)
+
+          const currentViewBox = clonedSvg.getAttribute('viewBox')?.split(' ').map(Number) || [0, 0, originalSvg.clientWidth, originalSvg.clientHeight]
+          const newHeight = parseFloat(String(currentViewBox[3])) + 50
+          clonedSvg.setAttribute('viewBox', `${currentViewBox[0]} ${currentViewBox[1]} ${currentViewBox[2]} ${newHeight}`)
+          clonedSvg.setAttribute('height', String(originalSvg.clientHeight + 50))
+        }
+
+        const serializer = new XMLSerializer()
+        const svgString = '<?xml version="1.0" encoding="UTF-8"?>\n' + serializer.serializeToString(clonedSvg)
+        const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
+        const url = URL.createObjectURL(blob)
 
         const link = document.createElement("a")
         link.download = `${currentData.title || "chart"}.svg`
-        link.href = dataUrl
+        link.href = url
         link.click()
+        setTimeout(() => URL.revokeObjectURL(url), 100)
+
+        toast({
+          title: "Export successful",
+          description: "Your SVG file (vector) has been downloaded.",
+        })
       }
     } catch (error) {
       console.error("Export failed:", error)
+      toast({
+        title: "Export failed",
+        description: "There was an error generating your file. Please try again.",
+        variant: "destructive",
+      })
     }
   }
 
