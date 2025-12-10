@@ -17,7 +17,7 @@ export async function analyzeData(rawText: string): Promise<AIAnalysisResult> {
                 Authorization: `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-                model: "gpt-4o-mini",
+                model: "gpt-4o",
                 messages: [
                     {
                         role: "system",
@@ -43,10 +43,11 @@ Return ONLY valid JSON in this exact format:
 
 Rules:
 - **CRITICAL**: If the input contains dates or timestamps (e.g., logs, time-series), **PRIORITIZE** aggregating by time (e.g., "Revenue by Month", "Log Counts by Day", "Activity by Hour"). This provides the most valuable trend view.
+- **Normalize Timestamps**: When pivoting, if events don't happen at the exact same second, **bucket them** (e.g., to the nearest hour or day) to ensuring rows align perfectly.
 - **ENABLE MULTI-SERIES**: If there is a categorical field (like Region, Department, Device), **PIVOT** the data so that each category becomes its own column.
   - BAD: \`[{ "month": "Jan", "region": "North America", "sales": 100 }, { "month": "Jan", "region": "Europe", "sales": 80 }]\`
   - GOOD: \`[{ "month": "Jan", "North America": 100, "Europe": 80 }]\`
-  - This allows the chart to show multiple comparing lines/bars, which is much richer than a single line.
+- **Handle Complex Logs**: If input has multiple metrics (e.g. Solar, Grid, Battery) per station, **pick the most important metric** (e.g. Solar Generation) to compare across stations, OR create composite columns like "Alpha_Solar", "Beta_Solar". Do NOT output sparse rows with nulls.
 - **Target Data Density**: Aim for **12-30 data points** (rows) in the result.
 - **AGGREGATION**: If the input is a raw list of transactions (>20 rows), you **MUST** aggregate. Do not return raw rows.
 - Always include at least one label column (string) and one numeric column.
