@@ -8,6 +8,12 @@ import { Plus, X, Trash2 } from "lucide-react"
 import type { ChartStyles } from "@/components/chart-workspace"
 import { cn } from "@/lib/utils"
 import { ColorPicker } from "@/components/ui/color-picker"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 
 interface StylePanelProps {
   styles: ChartStyles
@@ -123,91 +129,100 @@ export function StylePanel({
             </button>
           ))}
 
-          {/* Custom Palettes List */}
-          {customPalettes.map((palette) => (
-            <div
-              key={palette.id}
-              className={cn(
-                "w-full p-2 rounded-lg border flex items-center gap-3 transition-all group",
-                selectedPalette === palette.id ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
-              )}
-            >
-              <button
-                onClick={() => onPaletteChange(palette.id)}
-                className="flex-1 flex items-center gap-3"
-              >
-                <div className="flex gap-1">
-                  {palette.colors.slice(0, 5).map((color, i) => (
-                    <div key={i} className="w-4 h-4 rounded-full" style={{ backgroundColor: color }} />
+          {/* Custom Palettes Dropdown */}
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="custom-palettes" className="border-none">
+              <AccordionTrigger className="py-2 text-sm font-medium hover:no-underline">
+                Custom Palettes
+              </AccordionTrigger>
+              <AccordionContent className="space-y-3 pt-2">
+                {/* Custom Palette Editor or Add Button */}
+                {isEditingCustom ? (
+                  <div className="w-full p-3 rounded-lg border border-primary bg-primary/5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-foreground">
+                        {editingId ? "Edit Custom Palette" : "New Custom Palette"}
+                      </span>
+                      <button
+                        onClick={handleCancelCustomPalette}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="flex gap-2 justify-center">
+                      {tempCustomColors.map((color, i) => (
+                        <ColorPicker
+                          key={i}
+                          color={color}
+                          onChange={(newColor) => handleColorChange(i, newColor)}
+                          className="w-9 h-9"
+                        />
+                      ))}
+                    </div>
+                    <Button
+                      onClick={handleSaveCustomPalette}
+                      size="sm"
+                      className="w-full"
+                    >
+                      {editingId ? "Update Palette" : "Save Custom Palette"}
+                    </Button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleAddCustomPalette}
+                    className="w-full p-2 rounded-lg border border-dashed border-border hover:border-primary/50 flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-all"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span className="text-xs">Add Custom Palette</span>
+                  </button>
+                )}
+
+                {/* Custom Palettes List */}
+                <div className="space-y-2">
+                  {customPalettes.map((palette) => (
+                    <div
+                      key={palette.id}
+                      className={cn(
+                        "w-full p-2 rounded-lg border flex items-center gap-3 transition-all group",
+                        selectedPalette === palette.id ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                      )}
+                    >
+                      <button
+                        onClick={() => onPaletteChange(palette.id)}
+                        className="flex-1 flex items-center gap-3"
+                      >
+                        <div className="flex gap-1">
+                          {palette.colors.slice(0, 5).map((color, i) => (
+                            <div key={i} className="w-4 h-4 rounded-full" style={{ backgroundColor: color }} />
+                          ))}
+                        </div>
+                        <span className="text-xs text-foreground">Custom</span>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleEditCustomPalette(palette.id, palette.colors)
+                        }}
+                        className="opacity-0 group-hover:opacity-100 text-xs text-muted-foreground hover:text-foreground transition-opacity"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteCustomPalette(palette.id)
+                        }}
+                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
                   ))}
                 </div>
-                <span className="text-xs text-foreground">Custom</span>
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleEditCustomPalette(palette.id, palette.colors)
-                }}
-                className="opacity-0 group-hover:opacity-100 text-xs text-muted-foreground hover:text-foreground transition-opacity"
-              >
-                Edit
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleDeleteCustomPalette(palette.id)
-                }}
-                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
-              >
-                <Trash2 className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
-
-          {/* Custom Palette Editor */}
-          {isEditingCustom && (
-            <div className="w-full p-3 rounded-lg border border-primary bg-primary/5 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-foreground">
-                  {editingId ? "Edit Custom Palette" : "New Custom Palette"}
-                </span>
-                <button
-                  onClick={handleCancelCustomPalette}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="flex gap-2 justify-center">
-                {tempCustomColors.map((color, i) => (
-                  <ColorPicker
-                    key={i}
-                    color={color}
-                    onChange={(newColor) => handleColorChange(i, newColor)}
-                    className="w-9 h-9"
-                  />
-                ))}
-              </div>
-              <Button
-                onClick={handleSaveCustomPalette}
-                size="sm"
-                className="w-full"
-              >
-                {editingId ? "Update Palette" : "Save Custom Palette"}
-              </Button>
-            </div>
-          )}
-
-          {/* Add Custom Button */}
-          {!isEditingCustom && (
-            <button
-              onClick={handleAddCustomPalette}
-              className="w-full p-2 rounded-lg border border-dashed border-border hover:border-primary/50 flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-all"
-            >
-              <Plus className="w-4 h-4" />
-              <span className="text-xs">Add Custom Palette</span>
-            </button>
-          )}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </div>
 

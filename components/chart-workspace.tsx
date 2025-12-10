@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Download, ChevronLeft, ChevronRight, PanelLeftClose, PanelRightClose } from "lucide-react"
-import type { ChartType, ChartData } from "@/app/page"
 import { ChartPreview } from "@/components/chart-preview"
 import { DataPanel } from "@/components/data-panel"
 import { TemplateSidebar } from "@/components/template-sidebar"
@@ -11,18 +10,15 @@ import { StylePanel } from "@/components/style-panel"
 import { ExportModal } from "@/components/export-modal"
 import { ThemeToggle } from "@/components/theme-toggle"
 import * as htmlToImage from "html-to-image"
+import { ChartType, ChartData, ChartStyles, saveChart } from "@/lib/chart-storage"
 
 interface ChartWorkspaceProps {
   chartData: ChartData
   chartType: ChartType
+  initialId?: string
+  initialStyles?: ChartStyles
   onChartTypeChange: (type: ChartType) => void
   onBack: () => void
-}
-
-export interface ChartStyles {
-  colorPalette: string[]
-  showGrid: boolean
-  showLegend: boolean
 }
 
 const colorPalettes = {
@@ -33,21 +29,72 @@ const colorPalettes = {
   monochrome: ["#63738A", "#C4CCD6", "#323C4E", "#9BA5B4", "#4F596B"],
 }
 
-export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack }: ChartWorkspaceProps) {
+export function ChartWorkspace({
+  chartData,
+  chartType,
+  initialId,
+  initialStyles,
+  onChartTypeChange,
+  onBack
+}: ChartWorkspaceProps) {
   const chartRef = useRef<HTMLDivElement>(null)
-  const [styles, setStyles] = useState<ChartStyles>({
+
+  // Use a ref for ID to persist across re-renders without triggering them
+  const chartIdRef = useRef(initialId || `chart-${Date.now()}`)
+
+  const [styles, setStyles] = useState<ChartStyles>(initialStyles || {
     colorPalette: colorPalettes.sunset,
     showGrid: true,
     showLegend: true,
   })
   const [currentData, setCurrentData] = useState(chartData)
   const [showExport, setShowExport] = useState(false)
-  const [selectedPalette, setSelectedPalette] = useState<string>("sunset")
+
+  // Initialize palette selection based on loaded styles or default
+  const [selectedPalette, setSelectedPalette] = useState<string>(() => {
+    if (initialStyles) {
+      // Try to find if the loaded palette matches a preset
+      const preset = Object.entries(colorPalettes).find(([_, colors]) =>
+        JSON.stringify(colors) === JSON.stringify(initialStyles.colorPalette)
+      )
+      return preset ? preset[0] : "custom" // customized if not matching preset
+    }
+    return "sunset"
+  })
+
+  // Auto-save effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      saveChart({
+        id: chartIdRef.current,
+        title: currentData.title || "Untitled Chart",
+        data: currentData,
+        type: chartType,
+        styles: styles,
+        lastModified: Date.now()
+      })
+    }, 1000) // Debounce save by 1s
+
+    return () => clearTimeout(timer)
+  }, [currentData, chartType, styles])
+
   const [customPalettes, setCustomPalettes] = useState<Array<{ id: string; colors: string[] }>>([])
   const [leftPanelOpen, setLeftPanelOpen] = useState(true)
   const [rightPanelOpen, setRightPanelOpen] = useState(true)
   const [leftPanelWidth, setLeftPanelWidth] = useState(256) // 256px = w-64
   const [isResizing, setIsResizing] = useState(false)
+
+  /* Load custom palettes from localStorage on mount */
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("chart_custom_palettes")
+      if (saved) {
+        setCustomPalettes(JSON.parse(saved))
+      }
+    } catch (e) {
+      console.error("Failed to load custom palettes", e)
+    }
+  }, [])
 
   const handlePaletteChange = (palette: string) => {
     setSelectedPalette(palette)
@@ -63,6 +110,11 @@ export function ChartWorkspace({ chartData, chartType, onChartTypeChange, onBack
 
   const handleCustomPalettesChange = (palettes: Array<{ id: string; colors: string[] }>) => {
     setCustomPalettes(palettes)
+    try {
+      localStorage.setItem("chart_custom_palettes", JSON.stringify(palettes))
+    } catch (e) {
+      console.error("Failed to save custom palettes", e)
+    }
   }
 
   // Handle resizing with click-to-toggle behavior

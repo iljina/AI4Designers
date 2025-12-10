@@ -6,14 +6,7 @@ import { DataInputScreen } from "@/components/data-input-screen"
 import { TemplateSelectionScreen } from "@/components/template-selection-screen"
 import { ChartWorkspace } from "@/components/chart-workspace"
 import type { AIAnalysisResult } from "@/lib/ai-service"
-
-export type ChartType = "bar" | "line" | "area" | "pie" | "donut" | "bubble"
-
-export interface ChartData {
-  title: string
-  data: Array<Record<string, string | number>>
-  columns: string[]
-}
+import { ChartType, ChartData, ChartStyles, SavedChart } from "@/lib/chart-storage"
 
 export default function Home() {
   const [step, setStep] = useState<"welcome" | "data" | "template" | "workspace">("welcome")
@@ -21,7 +14,23 @@ export default function Home() {
   const [selectedTemplate, setSelectedTemplate] = useState<ChartType>("bar")
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResult | null>(null)
 
-  const handleStart = () => setStep("data")
+  // State for restoring saved charts
+  const [activeChartId, setActiveChartId] = useState<string | undefined>()
+  const [activeChartStyles, setActiveChartStyles] = useState<ChartStyles | undefined>()
+
+  const handleStart = () => {
+    setStep("data")
+    setActiveChartId(undefined)
+    setActiveChartStyles(undefined)
+  }
+
+  const handleLoadChart = (chart: SavedChart) => {
+    setChartData(chart.data)
+    setSelectedTemplate(chart.type)
+    setActiveChartId(chart.id)
+    setActiveChartStyles(chart.styles)
+    setStep("workspace")
+  }
 
   const handleDataSubmit = (data: ChartData) => {
     setChartData(data)
@@ -55,7 +64,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-background">
-      {step === "welcome" && <WelcomeScreen onStart={handleStart} />}
+      {step === "welcome" && <WelcomeScreen onStart={handleStart} onLoadChart={handleLoadChart} />}
       {step === "data" && (
         <DataInputScreen onSubmit={handleDataSubmit} onAnalyze={handleAIAnalysis} onBack={handleBack} />
       )}
@@ -68,8 +77,11 @@ export default function Home() {
       )}
       {step === "workspace" && chartData && (
         <ChartWorkspace
+          key={activeChartId || "new-chart"} // Force remount if ID changes
           chartData={chartData}
           chartType={selectedTemplate}
+          initialId={activeChartId}
+          initialStyles={activeChartStyles}
           onChartTypeChange={setSelectedTemplate}
           onBack={handleBack}
         />
