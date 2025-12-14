@@ -3,7 +3,7 @@
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import type { ChartData } from "@/app/page"
+import type { ChartData } from "@/lib/chart-storage"
 
 interface DataPanelProps {
   data: ChartData
@@ -43,8 +43,8 @@ export function DataPanel({ data, onDataChange }: DataPanelProps) {
   }
 
   return (
-    <>
-      <div className="space-y-2 mb-6">
+    <div className="flex flex-col h-full">
+      <div className="space-y-2 mb-4 flex-shrink-0">
         <Label htmlFor="chart-title" className="text-sm">
           Title
         </Label>
@@ -56,17 +56,17 @@ export function DataPanel({ data, onDataChange }: DataPanelProps) {
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="chart-data" className="text-sm">
+      <div className="space-y-2 flex-1 flex flex-col min-h-0">
+        <Label htmlFor="chart-data" className="text-sm flex-shrink-0">
           CSV Data
         </Label>
         <Textarea
           id="chart-data"
           value={csvString}
           onChange={(e) => handleCsvChange(e.target.value)}
-          className="min-h-[300px] font-mono text-xs bg-background"
+          className="flex-1 font-mono text-xs bg-background resize-none"
         />
       </div>
-    </>
+    </div>
   )
 }

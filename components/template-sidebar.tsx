@@ -24,8 +24,8 @@ const chartTypes: { type: ChartType; icon: React.ElementType; name: string }[] =
 
 export function TemplateSidebar({ selectedType, onTypeChange }: TemplateSidebarProps) {
   return (
-    <div className="p-4 border-b border-border">
-      <h2 className="font-semibold text-foreground mb-4">Chart Type</h2>
+    <div className="px-3 py-2 border-b border-border">
+      <h2 className="font-semibold text-foreground mb-3">Chart Type</h2>
       <div className="grid grid-cols-3 gap-2">
         {chartTypes.map(({ type, icon: Icon, name }) => (
           <button

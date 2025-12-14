@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Plus, X, Trash2 } from "lucide-react"
-import type { ChartStyles } from "@/components/chart-workspace"
+import type { ChartStyles } from "@/lib/chart-storage"
 import { cn } from "@/lib/utils"
 import { ColorPicker } from "@/components/ui/color-picker"
 import {
@@ -102,9 +102,9 @@ export function StylePanel({
   }
 
   return (
-    <div className="flex-1 p-4 space-y-6 overflow-y-auto">
+    <div className="flex-1 px-3 py-2 space-y-4">
       <div>
-        <h2 className="font-semibold text-foreground mb-4">Style</h2>
+        <h2 className="font-semibold text-foreground mb-3">Style</h2>
       </div>
 
       {/* Color Palette */}

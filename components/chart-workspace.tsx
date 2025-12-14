@@ -293,7 +293,7 @@ export function ChartWorkspace({
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col">
       {/* Header */}
       <header className="border-b border-border px-4 py-3 flex items-center justify-between bg-card dark:bg-[#150E10]">
         <div className="flex items-center gap-4">
@@ -312,15 +312,16 @@ export function ChartWorkspace({
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 flex relative">
+      <div className="flex-1 flex relative overflow-hidden">
         {/* Left Panel - Data */}
         <>
           <div
-            className="border-r border-border bg-card dark:bg-[#150E10] overflow-y-auto"
+            className="border-r border-border bg-card dark:bg-[#150E10] flex flex-col"
             style={{ width: leftPanelOpen ? `${leftPanelWidth}px` : '48px' }}
           >
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-4">
+            {/* Header - Fixed */}
+            <div className="px-3 py-2 border-b border-border flex-shrink-0">
+              <div className="flex items-center justify-between">
                 {leftPanelOpen && <h2 className="font-semibold text-foreground">Data</h2>}
                 <Button
                   variant="ghost"
@@ -335,8 +336,13 @@ export function ChartWorkspace({
                   )}
                 </Button>
               </div>
-              {leftPanelOpen && <DataPanel data={currentData} onDataChange={setCurrentData} />}
             </div>
+            {/* Scrollable Content */}
+            {leftPanelOpen && (
+              <div className="flex-1 overflow-y-auto px-3 py-2">
+                <DataPanel data={currentData} onDataChange={setCurrentData} />
+              </div>
+            )}
           </div>
           {/* Resize Handle */}
           {leftPanelOpen && (
@@ -348,14 +354,15 @@ export function ChartWorkspace({
         </>
 
         {/* Center - Chart Preview */}
-        <div className="flex-1 p-6 flex items-center justify-center bg-background">
+        <div className="flex-1 p-6 flex items-center justify-center bg-background overflow-auto">
           <ChartPreview ref={chartRef} data={currentData} chartType={chartType} styles={styles} />
         </div>
 
         {/* Right Panel - Template & Style */}
         <div className="border-l border-border bg-card dark:bg-[#150E10] flex flex-col" style={{ width: rightPanelOpen ? '288px' : '48px' }}>
-          <div className="p-4">
-            <div className={`flex items-center mb-4 ${rightPanelOpen ? 'justify-between' : 'justify-end'}`}>
+          {/* Header - Fixed */}
+          <div className="px-3 py-2 border-b border-border flex-shrink-0">
+            <div className={`flex items-center ${rightPanelOpen ? 'justify-between' : 'justify-end'}`}>
               {rightPanelOpen && <h2 className="font-semibold text-foreground">Appearance</h2>}
               <Button
                 variant="ghost"
@@ -371,8 +378,9 @@ export function ChartWorkspace({
               </Button>
             </div>
           </div>
+          {/* Scrollable Content */}
           {rightPanelOpen && (
-            <>
+            <div className="flex-1 overflow-y-auto">
               <TemplateSidebar selectedType={chartType} onTypeChange={onChartTypeChange} />
               <StylePanel
                 styles={styles}
@@ -383,7 +391,7 @@ export function ChartWorkspace({
                 customPalettes={customPalettes}
                 onCustomPalettesChange={handleCustomPalettesChange}
               />
-            </>
+            </div>
           )}
         </div>
       </div>
